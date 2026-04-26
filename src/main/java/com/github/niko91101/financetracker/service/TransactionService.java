@@ -4,6 +4,7 @@ import com.github.niko91101.financetracker.exception.TransactionNotFoundExceptio
 import com.github.niko91101.financetracker.model.Transaction;
 import com.github.niko91101.financetracker.repository.CategoryRepository;
 import com.github.niko91101.financetracker.repository.TransactionRepository;
+import com.github.niko91101.financetracker.validation.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,9 +26,8 @@ public class TransactionService {
     }
 
     public Transaction saveTransaction(Transaction transaction) {
-        if (transaction == null) {
-            throw new IllegalArgumentException("Транзакция не может быть пустая");
-        }
+
+        ValidationUtil.validate(transaction);
 
         transaction.setCategory(categoryRepository.findById(transaction.getCategory().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Ошибка!")));
@@ -36,7 +36,9 @@ public class TransactionService {
     }
 
     public Transaction updateTransaction(Long id, Transaction newTransaction) {
-        if (newTransaction == null || (!transactionRepository.existsById(id))) {
+        ValidationUtil.validate(newTransaction);
+
+        if ((!transactionRepository.existsById(id))) {
             throw new IllegalArgumentException("Такой транзакции нет");
         }
 
@@ -45,9 +47,8 @@ public class TransactionService {
     }
 
     public void deleteTransaction(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Некорректно передан id");
-        }
+
+        ValidationUtil.validate(id);
 
         transactionRepository.deleteById(id);
     }
