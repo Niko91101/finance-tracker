@@ -52,4 +52,17 @@ public class TransactionService {
 
         transactionRepository.deleteById(id);
     }
+
+    public Integer sumTransactionsWithAmountMore500(List<Transaction> transactions) {
+        ValidationUtil.validate(transactions);
+
+        if (transactions.isEmpty()) {
+            throw new IllegalArgumentException("Список транзацкий пуст");
+        }
+
+        return transactions.stream()
+                .mapToInt(Transaction::getAmount)
+                .filter(amount -> amount >= 500)
+                .sum();
+    }
 }
