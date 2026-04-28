@@ -1,7 +1,9 @@
 package com.github.niko91101.financetracker.service;
 
+import com.github.niko91101.financetracker.dto.request.CreateUserRequest;
+import com.github.niko91101.financetracker.dto.response.UserResponse;
+import com.github.niko91101.financetracker.mapper.UserMapper;
 import com.github.niko91101.financetracker.model.User;
-import com.github.niko91101.financetracker.repository.TransactionRepository;
 import com.github.niko91101.financetracker.repository.UserRepository;
 import com.github.niko91101.financetracker.validation.ValidationUtil;
 import lombok.RequiredArgsConstructor;
@@ -11,32 +13,36 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final TransactionRepository transactionRepository;
+    private final UserMapper userMapper;
 
-    public User getUserById(Long id) {
+    public UserResponse getUserById(Long id) {
         ValidationUtil.validate(id);
 
-        return userRepository.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Пользователя с  id: " + id + " не найдено!" ));
+
+        return userMapper.toResponse(user);
     }
 
-    public User saveUser(User user) {
+    public UserResponse saveUser(CreateUserRequest user) {
         ValidationUtil.validate(user);
 
-        return userRepository.save(user);
+        User userEntity = userRepository.save(userMapper.toEntity(user));
+        return userMapper.toResponse(userEntity);
     }
 
-    public User updateUser(Long id, User updateUser) {
+    public UserResponse updateUser(Long id, CreateUserRequest updateUser) {
         ValidationUtil.validate(updateUser);
 
         if (!userRepository.existsById(id)) {
             throw new IllegalArgumentException("Пользователя с id: " + id + " нет");
         }
 
-        updateUser.setId(id);
+        User updatedUser = userMapper.toEntity(updateUser);
+        updatedUser.setId(id);
+        User savedUser = userRepository.save(updatedUser);
 
-        return userRepository.save(updateUser);
-
+        return userMapper.toResponse(savedUser);
     }
 
     public void deleteUser(Long id) {
