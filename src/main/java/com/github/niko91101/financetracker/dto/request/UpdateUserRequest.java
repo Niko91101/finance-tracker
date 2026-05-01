@@ -1,4 +1,4 @@
-package com.github.niko91101.financetracker.dto.response;
+package com.github.niko91101.financetracker.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

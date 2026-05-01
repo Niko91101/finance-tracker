@@ -30,6 +30,7 @@ public class User {
     @Size(min = 5, max = 12, message = "Имя должно быть от 5 до 12 символом")
     private String password;
 
+    @Builder.Default
     private LocalDate date = LocalDate.now();
 
     @JsonIgnore
