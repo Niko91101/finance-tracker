@@ -1,6 +1,7 @@
 package com.github.niko91101.financetracker.service;
 
 import com.github.niko91101.financetracker.dto.request.CreateUserRequest;
+import com.github.niko91101.financetracker.dto.request.UpdateUserRequest;
 import com.github.niko91101.financetracker.dto.response.UserResponse;
 import com.github.niko91101.financetracker.mapper.UserMapper;
 import com.github.niko91101.financetracker.model.User;
@@ -31,7 +32,7 @@ public class UserService {
         return userMapper.toResponse(userEntity);
     }
 
-    public UserResponse updateUser(Long id, CreateUserRequest updateUser) {
+    public UserResponse updateUser(Long id, UpdateUserRequest updateUser) {
         ValidationUtil.validate(updateUser);
 
         if (!userRepository.existsById(id)) {
