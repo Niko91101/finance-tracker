@@ -1,5 +1,6 @@
 package com.github.niko91101.financetracker.service;
 
+import com.github.niko91101.financetracker.enums.TypeTransactions;
 import com.github.niko91101.financetracker.exception.TransactionNotFoundException;
 import com.github.niko91101.financetracker.model.Transaction;
 import com.github.niko91101.financetracker.repository.CategoryRepository;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,5 +67,10 @@ public class TransactionService {
                 .mapToInt(Transaction::getAmount)
                 .filter(amount -> amount >= 500)
                 .sum();
+    }
+
+    public Map<TypeTransactions, List<Transaction>> getTransactionOnCategory(List<Transaction> transactions) {
+        return transactions.stream()
+               .collect(Collectors.groupingBy((transaction ->  transaction.getCategory().getType())));
     }
 }
