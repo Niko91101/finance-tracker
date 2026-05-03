@@ -1,10 +1,18 @@
 package com.github.niko91101.financetracker.service;
 
+import com.github.niko91101.financetracker.dto.request.CreateTransactionRequest;
+import com.github.niko91101.financetracker.dto.request.UpdateTransactionRequest;
+import com.github.niko91101.financetracker.dto.response.TransactionResponse;
 import com.github.niko91101.financetracker.enums.TypeTransactions;
+import com.github.niko91101.financetracker.exception.CategoryNotFoundException;
 import com.github.niko91101.financetracker.exception.TransactionNotFoundException;
+import com.github.niko91101.financetracker.mapper.TransactionMapper;
+import com.github.niko91101.financetracker.model.Category;
 import com.github.niko91101.financetracker.model.Transaction;
+import com.github.niko91101.financetracker.model.User;
 import com.github.niko91101.financetracker.repository.CategoryRepository;
 import com.github.niko91101.financetracker.repository.TransactionRepository;
+import com.github.niko91101.financetracker.repository.UserRepository;
 import com.github.niko91101.financetracker.validation.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,35 +26,54 @@ import java.util.stream.Collectors;
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
+    private final TransactionMapper transactionMapper;
 
     public List<Transaction> getAllTransaction() {
         return transactionRepository.findAll();
     }
 
-    public Transaction getTransactionalById(Long id) {
-        return transactionRepository.findById(id)
+    public TransactionResponse getTransactionalById(Long id) {
+        Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new TransactionNotFoundException(id));
+
+        return transactionMapper.toResponse(transaction);
     }
 
-    public Transaction saveTransaction(Transaction transaction) {
+    public TransactionResponse saveTransaction(CreateTransactionRequest request) {
 
-        ValidationUtil.validate(transaction);
+        ValidationUtil.validate(request);
 
-        transaction.setCategory(categoryRepository.findById(transaction.getCategory().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Ошибка!")));
+        Transaction transaction = transactionMapper.toEntity(request);
 
-        return transactionRepository.save(transaction);
+        Category category = categoryRepository.findById(request.getCategoryId())
+                        .orElseThrow(() -> new CategoryNotFoundException(request.getCategoryId()));
+
+        User user = userRepository.findById(request.getUserId())
+                        .orElseThrow(() -> new IllegalArgumentException("Пользователя с таким ID нет"));
+
+        transaction.setCategory(category);
+        transaction.setUser(user);
+
+        return transactionMapper.toResponse(transactionRepository.save(transaction));
     }
 
-    public Transaction updateTransaction(Long id, Transaction newTransaction) {
-        ValidationUtil.validate(newTransaction);
+    public TransactionResponse updateTransaction(Long id, UpdateTransactionRequest request) {
+        ValidationUtil.validate(request);
 
         if ((!transactionRepository.existsById(id))) {
             throw new IllegalArgumentException("Такой транзакции нет");
         }
 
-        newTransaction.setId(id);
-        return transactionRepository.save(newTransaction);
+        Transaction transaction = transactionMapper.toEntity(request);
+        transaction.setId(id);
+
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new CategoryNotFoundException(transaction.getCategory().getId()));
+
+        transaction.setCategory(category);
+
+        return transactionMapper.toResponse(transactionRepository.save(transaction));
     }
 
     public void deleteTransaction(Long id) {

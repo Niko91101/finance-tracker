@@ -1,5 +1,8 @@
 package com.github.niko91101.financetracker.controller;
 
+import com.github.niko91101.financetracker.dto.request.CreateTransactionRequest;
+import com.github.niko91101.financetracker.dto.request.UpdateTransactionRequest;
+import com.github.niko91101.financetracker.dto.response.TransactionResponse;
 import com.github.niko91101.financetracker.model.Transaction;
 import com.github.niko91101.financetracker.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -22,19 +25,19 @@ public class TransactionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Transaction> getTransactionById(@PathVariable Long id) {
+    public ResponseEntity<TransactionResponse> getTransactionById(@PathVariable Long id) {
         return ResponseEntity.ok(transactionService.getTransactionalById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Transaction> saveTransaction(@RequestBody Transaction transaction) {
-        Transaction savedTransaction = transactionService.saveTransaction(transaction);
+    public ResponseEntity<TransactionResponse> saveTransaction(@RequestBody CreateTransactionRequest transaction) {
+        TransactionResponse savedTransaction = transactionService.saveTransaction(transaction);
 
         return ResponseEntity.created(URI.create("transaction/" + savedTransaction.getId())).body(savedTransaction);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Transaction> updateTransaction(@RequestBody Transaction transaction, @PathVariable Long id) {
+    public ResponseEntity<TransactionResponse> updateTransaction(@RequestBody UpdateTransactionRequest transaction, @PathVariable Long id) {
         return ResponseEntity.ok(transactionService.updateTransaction(id, transaction));
     }
 
