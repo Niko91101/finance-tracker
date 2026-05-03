@@ -29,8 +29,11 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final TransactionMapper transactionMapper;
 
-    public List<Transaction> getAllTransaction() {
-        return transactionRepository.findAll();
+    public List<TransactionResponse> getAllTransaction() {
+        return transactionRepository.findAll()
+                .stream()
+                .map(transactionMapper::toResponse)
+                .toList();
     }
 
     public TransactionResponse getTransactionalById(Long id) {

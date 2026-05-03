@@ -20,7 +20,7 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @GetMapping
-    public ResponseEntity<List<Transaction>> getAllTransactions() {
+    public ResponseEntity<List<TransactionResponse>> getAllTransactions() {
         return ResponseEntity.ok(transactionService.getAllTransaction());
     }
 
