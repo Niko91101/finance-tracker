@@ -2,9 +2,7 @@ package com.github.niko91101.financetracker.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -13,6 +11,8 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Table(name = "transactions")
+@Builder
+@AllArgsConstructor
 public class Transaction {
 
     @Id
@@ -22,7 +22,9 @@ public class Transaction {
     @NotNull(message = "Сумма не можеть быть пустой")
     private Integer amount;
 
+    @Builder.Default
     private LocalDate date = LocalDate.now();
+
     private String description;
 
     @ManyToOne
