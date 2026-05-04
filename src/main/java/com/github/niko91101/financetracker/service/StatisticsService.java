@@ -31,4 +31,19 @@ public class StatisticsService {
 
         return income - expense;
     }
+
+    public Integer getTotalIncome(long userId) {
+        return sumByType(userId, TypeTransactions.INCOME);
+    }
+
+    public Integer getTotalExpense(long userId) {
+        return sumByType(userId, TypeTransactions.EXPENSE);
+    }
+
+    private Integer sumByType(Long userId, TypeTransactions type) {
+        return transactionRepository.findByUserId(userId).stream()
+                .filter(transaction -> transaction.getCategory().getType().equals(type))
+                .mapToInt(Transaction::getAmount)
+                .sum();
+    }
 }
