@@ -7,8 +7,10 @@ import com.github.niko91101.financetracker.mapper.UserMapper;
 import com.github.niko91101.financetracker.model.User;
 import com.github.niko91101.financetracker.repository.UserRepository;
 import com.github.niko91101.financetracker.validation.ValidationUtil;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +18,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    @Transactional(readOnly = true)
     public UserResponse getUserById(Long id) {
         ValidationUtil.validate(id);
 
@@ -25,6 +28,7 @@ public class UserService {
         return userMapper.toResponse(user);
     }
 
+    @Transactional
     public UserResponse saveUser(CreateUserRequest user) {
         ValidationUtil.validate(user);
 
@@ -32,6 +36,7 @@ public class UserService {
         return userMapper.toResponse(userEntity);
     }
 
+    @Transactional
     public UserResponse updateUser(Long id, UpdateUserRequest updateUser) {
         ValidationUtil.validate(updateUser);
 
@@ -46,6 +51,7 @@ public class UserService {
         return userMapper.toResponse(savedUser);
     }
 
+    @Transactional
     public void deleteUser(Long id) {
         ValidationUtil.validate(id);
         userRepository.deleteById(id);
