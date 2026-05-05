@@ -16,6 +16,7 @@ import com.github.niko91101.financetracker.repository.UserRepository;
 import com.github.niko91101.financetracker.validation.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final TransactionMapper transactionMapper;
 
+    @Transactional(readOnly = true)
     public List<TransactionResponse> getAllTransaction() {
         return transactionRepository.findAll()
                 .stream()
@@ -36,6 +38,7 @@ public class TransactionService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public TransactionResponse getTransactionalById(Long id) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new TransactionNotFoundException(id));
@@ -43,6 +46,7 @@ public class TransactionService {
         return transactionMapper.toResponse(transaction);
     }
 
+    @Transactional
     public TransactionResponse saveTransaction(CreateTransactionRequest request) {
 
         ValidationUtil.validate(request);
@@ -61,6 +65,7 @@ public class TransactionService {
         return transactionMapper.toResponse(transactionRepository.save(transaction));
     }
 
+    @Transactional
     public TransactionResponse updateTransaction(Long id, UpdateTransactionRequest request) {
         ValidationUtil.validate(request);
 
@@ -79,6 +84,7 @@ public class TransactionService {
         return transactionMapper.toResponse(transactionRepository.save(transaction));
     }
 
+    @Transactional
     public void deleteTransaction(Long id) {
 
         ValidationUtil.validate(id);
