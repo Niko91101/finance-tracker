@@ -77,7 +77,7 @@ public class TransactionService {
         transaction.setId(id);
 
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new CategoryNotFoundException(transaction.getCategory().getId()));
+                .orElseThrow(() -> new CategoryNotFoundException(request.getCategoryId()));
 
         transaction.setCategory(category);
 
