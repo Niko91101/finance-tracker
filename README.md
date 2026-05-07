@@ -66,6 +66,13 @@ mvn spring-boot:run
 |-------|-----|----------|
 | GET | /categories | Все категории |
 
+### Statistics
+| Метод | URL | Описание |
+|-------|-----|----------|
+| GET | /statistics/balance/{userId} | Баланс пользователя |
+| GET | /statistics/income/{userId} | Сумма доходов |
+| GET | /statistics/expense/{userId} | Сумма расходов |
+
 ## Автор
 
 [Niko91101](https://github.com/Niko91101)
