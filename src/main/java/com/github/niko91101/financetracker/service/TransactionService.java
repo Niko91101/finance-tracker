@@ -109,4 +109,9 @@ public class TransactionService {
         return transactions.stream()
                .collect(Collectors.groupingBy((transaction ->  transaction.getCategory().getType())));
     }
+
+    public Map<Long, Integer> getSumOfTransactionsByUserId(List<Transaction> transactions) {
+        return transactions.stream()
+                .collect(Collectors.groupingBy(transaction -> transaction.getUser().getId(), Collectors.summingInt(Transaction::getAmount)));
+    }
 }
