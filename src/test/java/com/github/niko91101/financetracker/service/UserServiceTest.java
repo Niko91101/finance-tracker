@@ -148,7 +148,6 @@ public class UserServiceTest {
     }
 
     @Nested
-    @DisplayName("updateUser")
     class UpdateUser {
         UpdateUserRequest request;
 
