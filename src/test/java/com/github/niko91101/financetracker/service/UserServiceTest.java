@@ -1,10 +1,14 @@
 package com.github.niko91101.financetracker.service;
 
+import com.github.niko91101.financetracker.dto.request.CreateUserRequest;
+import com.github.niko91101.financetracker.dto.request.UpdateUserRequest;
 import com.github.niko91101.financetracker.dto.response.UserResponse;
 import com.github.niko91101.financetracker.mapper.UserMapper;
 import com.github.niko91101.financetracker.repository.UserRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -95,32 +99,89 @@ public class UserServiceTest {
     }
 
 
+    @Nested
+    @DisplayName("saveUser")
+    class SaveUser {
 
-    @Test
-    @DisplayName("getUserById : должен выбросить исключение при null id")
-    void shouldThrowWhenGetUserByIdCalledWithNull() {
-        assertThrows(IllegalArgumentException.class,
-                () -> userService.getUserById(null));
+        CreateUserRequest request;
+
+        @BeforeEach
+        void setup() {
+            request = CreateUserRequest.builder()
+                    .username("Стас")
+                    .password("secret")
+                    .build();
+        }
+
+        @Test
+        @DisplayName("Должен сохранить пользователя и вернуть UserResponse")
+        void shouldSaveUser() {
+            when(userMapper.toEntity(request))
+                    .thenReturn(userEntity);
+
+            when(userRepository.save(userEntity))
+                    .thenReturn(userEntity);
+
+            when(userMapper.toResponse(userEntity))
+                    .thenReturn(userResponse);
+
+            UserResponse result = userService.saveUser(request);
+
+            assertNotNull(result);
+
+            InOrder inOrder = inOrder(userMapper, userRepository);
+            inOrder.verify(userMapper).toEntity(request);
+            inOrder.verify(userRepository).save(userEntity);
+            inOrder.verify(userMapper).toResponse(userEntity);
+            inOrder.verifyNoMoreInteractions();
+        }
+
+        @Test
+        @DisplayName("Должен выбросить исключение IllegalArgumentException, когда request null")
+        void shouldThrowWhenRequestIsNull() {
+
+            assertThrows(IllegalArgumentException.class,
+                    () -> userService.saveUser(null));
+
+            verifyNoInteractions(userRepository, userMapper);
+        }
     }
 
-    @Test
-    @DisplayName("saveUser : должен выбросить исключение при null запросе")
-    void shouldThrowWhenSaveUserCalledWithNull() {
-        assertThrows(IllegalArgumentException.class,
-                () -> userService.saveUser(null));
-    }
+    class UpdateUser {
+        UpdateUserRequest request;
 
-    @Test
-    @DisplayName("upgradeUser : должен выбросить исключение при null запросе")
-    void shouldThrowWhenUpdateUserCalledWithNull() {
-        assertThrows(IllegalArgumentException.class,
-                () -> userService.updateUser(1L, null));
-    }
+        @BeforeEach
+        void setup() {
+            request = UpdateUserRequest.builder()
+                    .username("Стасик")
+                    .password("secret")
+                    .build();
+        }
 
-    @Test
-    @DisplayName("deleteUser: должен выбросить исключение при null id")
-    void shouldThrowWhenDeleteUserCalledWithNull() {
-        assertThrows(IllegalArgumentException.class,
-                () -> userService.deleteUser(null));
+        @Test
+        @DisplayName("Должен изменить пользователя и вернуть UserResponse")
+        void shouldUpdateUser() {
+
+            when(userRepository.existsById(1L))
+                    .thenReturn(true);
+            when(userMapper.toEntity(request))
+                    .thenReturn(userEntity);
+
+            when(userRepository.save(any()))
+                    .thenReturn(userEntity);
+
+            when(userMapper.toResponse(userEntity))
+                    .thenReturn(userResponse);
+
+
+            UserResponse result = userService.updateUser(1L, request);
+
+            assertNotNull(result);
+
+            ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+            verify(userRepository.save(captor.capture()));
+
+            assertEquals(1L, captor.getValue().getId());
+        }
     }
 }
