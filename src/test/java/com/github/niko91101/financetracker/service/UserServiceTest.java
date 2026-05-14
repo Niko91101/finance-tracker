@@ -148,7 +148,6 @@ public class UserServiceTest {
     }
 
     @Nested
-    @DisplayName("updateUser")
     class UpdateUser {
         UpdateUserRequest request;
 
@@ -184,6 +183,21 @@ public class UserServiceTest {
             verify(userRepository.save(captor.capture()));
 
             assertEquals(1L, captor.getValue().getId());
+        }
+
+        @Test
+        @DisplayName("Должен выбросить исключения IllegalArgumentException когда пользователь не найден")
+        void shouldThrowWhenUserNotFound() {
+            when(userRepository.existsById(99L))
+                    .thenReturn(false);
+
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                    () -> userService.updateUser(99L, request));
+
+            assertTrue(ex.getMessage().contains("99"));
+            verify(userRepository).existsById(99L);
+            verify(userRepository, never()).save(any());
+            verifyNoInteractions(userMapper);
         }
     }
 }
