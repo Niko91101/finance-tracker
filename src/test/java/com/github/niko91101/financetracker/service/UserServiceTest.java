@@ -184,5 +184,20 @@ public class UserServiceTest {
 
             assertEquals(1L, captor.getValue().getId());
         }
+
+        @Test
+        @DisplayName("Должен выбросить исключения IllegalArgumentException когда пользователь не найден")
+        void shouldThrowWhenUserNotFound() {
+            when(userRepository.existsById(99L))
+                    .thenReturn(false);
+
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                    () -> userService.updateUser(99L, request));
+
+            assertTrue(ex.getMessage().contains("99"));
+            verify(userRepository).existsById(99L);
+            verify(userRepository, never()).save(any());
+            verifyNoInteractions(userMapper);
+        }
     }
 }
