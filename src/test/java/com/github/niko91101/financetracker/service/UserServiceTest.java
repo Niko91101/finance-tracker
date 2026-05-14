@@ -7,6 +7,8 @@ import com.github.niko91101.financetracker.mapper.UserMapper;
 import com.github.niko91101.financetracker.repository.UserRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
@@ -15,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.github.niko91101.financetracker.model.User;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
@@ -200,4 +203,24 @@ public class UserServiceTest {
             verifyNoInteractions(userMapper);
         }
     }
+
+    @Nested
+    @DisplayName("getUserById() - валидация id")
+    class GetUserByIdValidation {
+
+        @ParameterizedTest
+        @ValueSource(longs = {0L, -1L, -100L})
+        @NullSource
+        @DisplayName("Должен выбросить исключение когда значение отрицательное или ноль")
+        void shouldThrowWhenIdNotPositive(Long id) {
+
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                    () -> userService.getUserById(id));
+
+            assertTrue(ex.getMessage().contains("negative"));
+            verifyNoInteractions(userRepository, userMapper);
+        }
+    }
+
+
 }
