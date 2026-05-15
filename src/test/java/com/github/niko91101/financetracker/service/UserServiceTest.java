@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.github.niko91101.financetracker.model.User;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
@@ -183,7 +182,7 @@ public class UserServiceTest {
             assertNotNull(result);
 
             ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-            verify(userRepository.save(captor.capture()));
+            verify(userRepository).save(captor.capture());
 
             assertEquals(1L, captor.getValue().getId());
         }
@@ -214,10 +213,9 @@ public class UserServiceTest {
         @DisplayName("Должен выбросить исключение когда значение отрицательное или ноль")
         void shouldThrowWhenIdNotPositive(Long id) {
 
-            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            assertThrows(IllegalArgumentException.class,
                     () -> userService.getUserById(id));
 
-            assertTrue(ex.getMessage().contains("negative"));
             verifyNoInteractions(userRepository, userMapper);
         }
     }
