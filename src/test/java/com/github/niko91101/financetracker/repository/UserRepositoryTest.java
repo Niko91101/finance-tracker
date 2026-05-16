@@ -32,4 +32,12 @@ public class UserRepositoryTest extends IntegrationTestBase {
         Assertions.assertTrue(found.isPresent());
         Assertions.assertEquals("Стасик", found.get().getUsername());
     }
-}
+
+    @Test
+    @Transactional
+    @DisplayName("Должен вернуть пустой Optional когда пользователь не найден")
+    void shouldReturnEmptyWhenUserNotFound()
+    {
+        Optional<User> found = userRepository.findById(999L);
+        Assertions.assertTrue(found.isEmpty());
+    }}
