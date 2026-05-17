@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class UserRepositoryTest extends IntegrationTestBase {
 
     @Autowired
@@ -29,9 +31,26 @@ public class UserRepositoryTest extends IntegrationTestBase {
 
         Optional<User> found = userRepository.findById(saved.getId());
 
-        Assertions.assertTrue(found.isPresent());
+        assertTrue(found.isPresent());
         Assertions.assertEquals("Стасик", found.get().getUsername());
     }
+
+    @Test
+    @Transactional
+    @DisplayName("Должен удалить пользователя по id")
+    void shouldDeleteUser() {
+        User user = User.builder()
+                .username("Стасик")
+                .password("secret")
+                .build();
+
+        User saved = userRepository.save(user);
+        userRepository.deleteById(saved.getId());
+
+        Optional<User> found = userRepository.findById(saved.getId());
+        assertTrue(found.isEmpty());
+    }
+
 
     @Test
     @Transactional
@@ -39,5 +58,9 @@ public class UserRepositoryTest extends IntegrationTestBase {
     void shouldReturnEmptyWhenUserNotFound()
     {
         Optional<User> found = userRepository.findById(999L);
-        Assertions.assertTrue(found.isEmpty());
+        assertTrue(found.isEmpty());
     }}
+
+
+
+
