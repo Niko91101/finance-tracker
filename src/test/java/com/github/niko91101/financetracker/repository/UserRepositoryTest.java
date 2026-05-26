@@ -2,12 +2,13 @@ package com.github.niko91101.financetracker.repository;
 
 import com.github.niko91101.financetracker.IntegrationTestBase;
 import com.github.niko91101.financetracker.model.User;
+import com.github.niko91101.financetracker.util.UserTestFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class UserRepositoryTest extends IntegrationTestBase {
 
     @Autowired
@@ -22,12 +25,8 @@ public class UserRepositoryTest extends IntegrationTestBase {
 
     @Test
     @DisplayName("Должен сохранить и найти пользователя по ID")
-    @Transactional
     void shouldSaveAndFindUser() {
-        User user = User.builder()
-                .username("Стасик")
-                .password("secret")
-                .build();
+        User user = UserTestFactory.createDefaultUser();
 
         User saved = userRepository.save(user);
 
@@ -38,13 +37,9 @@ public class UserRepositoryTest extends IntegrationTestBase {
     }
 
     @Test
-    @Transactional
     @DisplayName("Должен удалить пользователя по id")
     void shouldDeleteUser() {
-        User user = User.builder()
-                .username("Стасик")
-                .password("secret")
-                .build();
+        User user = UserTestFactory.createDefaultUser();
 
         User saved = userRepository.save(user);
         userRepository.deleteById(saved.getId());
@@ -55,7 +50,6 @@ public class UserRepositoryTest extends IntegrationTestBase {
 
 
     @Test
-    @Transactional
     @DisplayName("Должен вернуть пустой Optional когда пользователь не найден")
     void shouldReturnEmptyWhenUserNotFound() {
         Optional<User> found = userRepository.findById(999L);
@@ -63,13 +57,9 @@ public class UserRepositoryTest extends IntegrationTestBase {
     }
 
     @Test
-    @Transactional
     @DisplayName("Должен обновить данные пользователя")
     void shouldUpdateUser() {
-        User user = User.builder()
-                .username("Стасик")
-                .password("secret")
-                .build();
+        User user = UserTestFactory.createDefaultUser();
 
         User saved = userRepository.save(user);
 
@@ -82,18 +72,11 @@ public class UserRepositoryTest extends IntegrationTestBase {
     }
 
     @Test
-    @Transactional
     @DisplayName("Должен вернуть список всех пользователей")
     void shouldFindAllUsers() {
-        User user1 = User.builder()
-                .username("Стасик")
-                .password("secret")
-                .build();
+        User user1 = UserTestFactory.createDefaultUser();
 
-        User user2 = User.builder()
-                .username("Павел")
-                .password("secret")
-                .build();
+        User user2 = UserTestFactory.createUser("Павел");
 
         userRepository.save(user1);
         userRepository.save(user2);
