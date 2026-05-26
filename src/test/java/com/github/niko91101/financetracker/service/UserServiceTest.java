@@ -9,14 +9,12 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.github.niko91101.financetracker.model.User;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
@@ -219,6 +217,4 @@ public class UserServiceTest {
             verifyNoInteractions(userRepository, userMapper);
         }
     }
-
-
 }
