@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.github.niko91101.financetracker.model.User;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
