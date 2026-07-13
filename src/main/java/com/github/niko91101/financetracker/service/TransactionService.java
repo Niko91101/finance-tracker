@@ -53,12 +53,9 @@ public class TransactionService {
 
         Transaction transaction = transactionMapper.toEntity(request);
 
-        Category category = categoryRepository.findById(request.getCategoryId())
-                        .orElseThrow(() -> new CategoryNotFoundException(request.getCategoryId()));
+        Category category = findCategoryOrThrow(request.getCategoryId());
 
-        User user = userRepository.findById(request.getUserId())
-                        .orElseThrow(() -> new IllegalArgumentException("Пользователя с таким ID нет"));
-
+        User user = findUserOrThrow(request.getUserId());
         transaction.setCategory(category);
         transaction.setUser(user);
 
@@ -76,8 +73,7 @@ public class TransactionService {
         Transaction transaction = transactionMapper.toEntity(request);
         transaction.setId(id);
 
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new CategoryNotFoundException(request.getCategoryId()));
+        Category category = findCategoryOrThrow(request.getCategoryId());
 
         transaction.setCategory(category);
 
@@ -107,11 +103,21 @@ public class TransactionService {
 
     public Map<TypeTransactions, List<Transaction>> getTransactionOnCategory(List<Transaction> transactions) {
         return transactions.stream()
-               .collect(Collectors.groupingBy((transaction ->  transaction.getCategory().getType())));
+                .collect(Collectors.groupingBy((transaction -> transaction.getCategory().getType())));
     }
 
     public Map<Long, Integer> getSumOfTransactionsByUserId(List<Transaction> transactions) {
         return transactions.stream()
                 .collect(Collectors.groupingBy(transaction -> transaction.getUser().getId(), Collectors.summingInt(Transaction::getAmount)));
+    }
+
+    private Category findCategoryOrThrow(Long categoryId) {
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CategoryNotFoundException(categoryId));
+    }
+
+    private User findUserOrThrow(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь с таким ID не найден"));
     }
 }
