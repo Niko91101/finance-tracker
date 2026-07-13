@@ -66,18 +66,17 @@ public class TransactionService {
     public TransactionResponse updateTransaction(Long id, UpdateTransactionRequest request) {
         ValidationUtil.validate(request);
 
-        if ((!transactionRepository.existsById(id))) {
-            throw new IllegalArgumentException("Такой транзакции нет");
-        }
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new TransactionNotFoundException(id));
 
-        Transaction transaction = transactionMapper.toEntity(request);
-        transaction.setId(id);
 
         Category category = findCategoryOrThrow(request.getCategoryId());
 
         transaction.setCategory(category);
+        transaction.setDescription(request.getDescription());
+        transaction.setAmount(request.getAmount());
 
-        return transactionMapper.toResponse(transactionRepository.save(transaction));
+        return transactionMapper.toResponse(transaction);
     }
 
     @Transactional
