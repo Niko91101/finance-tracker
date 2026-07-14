@@ -2,9 +2,13 @@ package com.github.niko91101.financetracker.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
+@Builder
 public class UpdateTransactionRequest {
     @NotNull(message = "Сумма не может быть пустой")
     private Integer amount;
