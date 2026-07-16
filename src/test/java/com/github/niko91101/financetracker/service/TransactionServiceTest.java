@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class TransactionServiceTest {
+class TransactionServiceTest {
 
     @Mock
     private TransactionRepository transactionRepository;
@@ -50,14 +50,12 @@ public class TransactionServiceTest {
     @BeforeEach
     void setUp() {
         category = Category.builder()
-
                 .id(1L)
                 .name("Food")
                 .type(TypeTransactions.EXPENSE)
                 .build();
 
         transaction = Transaction.builder()
-
                 .id(1L)
                 .amount(100)
                 .description("Old description")
@@ -65,14 +63,12 @@ public class TransactionServiceTest {
                 .build();
 
         request = UpdateTransactionRequest.builder()
-
                 .categoryId(category.getId())
                 .amount(500)
                 .description("New description")
                 .build();
 
         response = TransactionResponse.builder()
-
                 .id(transaction.getId())
                 .amount(request.getAmount())
                 .description(request.getDescription())
@@ -89,14 +85,15 @@ public class TransactionServiceTest {
         when(categoryRepository.findById(1L))
                 .thenReturn(Optional.of(category));
 
-        when((transactionMapper.toResponse(transaction)))
+        when(transactionMapper.toResponse(transaction))
                 .thenReturn(response);
 
         TransactionResponse result = transactionService.updateTransaction(1L, request);
 
-        assertNotNull(request);
+        assertNotNull(result);
 
         assertEquals(500, transaction.getAmount());
+        assertEquals(response, result);
         assertEquals("New description", transaction.getDescription());
         assertEquals(category, transaction.getCategory());
 
@@ -105,6 +102,8 @@ public class TransactionServiceTest {
         verify(transactionMapper).toResponse(transaction);
 
         verify(transactionRepository, never()).save(any());
+
+        verifyNoInteractions(userRepository);
     }
 
 
