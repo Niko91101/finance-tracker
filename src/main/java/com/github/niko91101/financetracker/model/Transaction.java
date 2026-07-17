@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -20,7 +21,8 @@ public class Transaction {
     private Long id;
 
     @NotNull(message = "Сумма не можеть быть пустой")
-    private  amount;
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal amount;
 
     @Builder.Default
     private LocalDate date = LocalDate.now();

@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,14 +58,14 @@ class TransactionServiceTest {
 
         transaction = Transaction.builder()
                 .id(1L)
-                .amount(100)
+                .amount(new BigDecimal("100"))
                 .description("Old description")
                 .category(category)
                 .build();
 
         request = UpdateTransactionRequest.builder()
                 .categoryId(category.getId())
-                .amount(500)
+                .amount(new BigDecimal("500"))
                 .description("New description")
                 .build();
 
@@ -92,7 +93,7 @@ class TransactionServiceTest {
 
         assertNotNull(result);
 
-        assertEquals(500, transaction.getAmount());
+        assertEquals(request.getAmount(), transaction.getAmount());
         assertEquals(response, result);
         assertEquals("New description", transaction.getDescription());
         assertEquals(category, transaction.getCategory());

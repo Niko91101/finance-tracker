@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/statistics")
@@ -13,17 +15,17 @@ public class StatisticsController {
     private final StatisticsService statisticsService;
 
     @GetMapping("/balance/{userId}")
-    public ResponseEntity<Integer> getTotalTransactions(@PathVariable long userId) {
+    public ResponseEntity<BigDecimal> getTotalTransactions(@PathVariable long userId) {
         return ResponseEntity.ok(statisticsService.getBalance(userId));
     }
 
     @GetMapping("/income/{userId}")
-    public ResponseEntity<Integer> getTotalIncome(@PathVariable long userId) {
+    public ResponseEntity<BigDecimal> getTotalIncome(@PathVariable long userId) {
         return ResponseEntity.ok(statisticsService.getTotalIncome(userId));
     }
 
     @GetMapping("/expense/{userId}")
-    public ResponseEntity<Integer> getTotalExpense(@PathVariable long userId) {
+    public ResponseEntity<BigDecimal> getTotalExpense(@PathVariable long userId) {
         return ResponseEntity.ok(statisticsService.getTotalExpense(userId));
     }
 }

@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -77,8 +78,7 @@ public class TransactionService {
         transaction.setDescription(request.getDescription());
         transaction.setAmount(request.getAmount());
 
-        Transaction savedTransaction = transactionRepository.save(transaction);
-        return transactionMapper.toResponse(savedTransaction);
+        return transactionMapper.toResponse(transaction);
     }
 
     @Transactional
@@ -89,17 +89,18 @@ public class TransactionService {
         transactionRepository.deleteById(id);
     }
 
-    public Integer sumTransactionsWithAmountMore500(List<Transaction> transactions) {
+    public BigDecimal sumTransactionsWithAmountMore500(List<Transaction> transactions) {
         ValidationUtil.validate(transactions);
 
         if (transactions.isEmpty()) {
             throw new IllegalArgumentException("Список транзацкий пуст");
         }
 
+        BigDecimal limit = new BigDecimal("500");
         return transactions.stream()
-                .mapToInt(Transaction::getAmount)
-                .filter(amount -> amount >= 500)
-                .sum();
+                .map(Transaction::getAmount)
+                .filter(amount -> amount.compareTo(limit) >= 0)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public Map<TypeTransactions, List<Transaction>> getTransactionOnCategory(List<Transaction> transactions) {
@@ -107,9 +108,16 @@ public class TransactionService {
                 .collect(Collectors.groupingBy((transaction -> transaction.getCategory().getType())));
     }
 
-    public Map<Long, Integer> getSumOfTransactionsByUserId(List<Transaction> transactions) {
+    public Map<Long, BigDecimal> getSumOfTransactionsByUserId(List<Transaction> transactions) {
         return transactions.stream()
-                .collect(Collectors.groupingBy(transaction -> transaction.getUser().getId(), Collectors.summingInt(Transaction::getAmount)));
+                .collect(Collectors.groupingBy(
+                        transaction -> transaction.getUser().getId()
+                        , Collectors.reducing(
+                                BigDecimal.ZERO,
+                                Transaction::getAmount,
+                                BigDecimal::add
+                        )
+                ));
     }
 
     private Category findCategoryOrThrow(Long categoryId) {

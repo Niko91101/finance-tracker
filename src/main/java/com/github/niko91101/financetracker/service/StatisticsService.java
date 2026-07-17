@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -17,35 +18,35 @@ public class StatisticsService {
     private final TransactionRepository transactionRepository;
 
 
-    public Integer getBalance(Long userId) {
+    public BigDecimal getBalance(Long userId) {
 
         List<Transaction> transactions = transactionRepository.findByUserId(userId);
 
-        int income = transactions.stream()
+        BigDecimal income = transactions.stream()
                 .filter(transaction -> transaction.getCategory().getType().equals(TypeTransactions.INCOME))
-                .mapToInt(Transaction::getAmount)
-                .sum();
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        int expense = transactions.stream()
+        BigDecimal expense = transactions.stream()
                 .filter(transaction -> transaction.getCategory().getType().equals(TypeTransactions.EXPENSE))
-                .mapToInt(Transaction::getAmount)
-                .sum();
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return income - expense;
+        return income.subtract(expense);
     }
 
-    public Integer getTotalIncome(long userId) {
+    public BigDecimal getTotalIncome(long userId) {
         return sumByType(userId, TypeTransactions.INCOME);
     }
 
-    public Integer getTotalExpense(long userId) {
+    public BigDecimal getTotalExpense(long userId) {
         return sumByType(userId, TypeTransactions.EXPENSE);
     }
 
-    private Integer sumByType(Long userId, TypeTransactions type) {
+    private BigDecimal sumByType(Long userId, TypeTransactions type) {
         return transactionRepository.findByUserId(userId).stream()
                 .filter(transaction -> transaction.getCategory().getType().equals(type))
-                .mapToInt(Transaction::getAmount)
-                .sum();
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
