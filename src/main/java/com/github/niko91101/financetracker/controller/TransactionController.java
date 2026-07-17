@@ -5,6 +5,7 @@ import com.github.niko91101.financetracker.dto.request.UpdateTransactionRequest;
 import com.github.niko91101.financetracker.dto.response.TransactionResponse;
 import com.github.niko91101.financetracker.model.Transaction;
 import com.github.niko91101.financetracker.service.TransactionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +31,7 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<TransactionResponse> saveTransaction(@RequestBody CreateTransactionRequest transaction) {
+    public ResponseEntity<TransactionResponse> saveTransaction(@Valid @RequestBody CreateTransactionRequest transaction) {
         TransactionResponse savedTransaction = transactionService.saveTransaction(transaction);
 
         return ResponseEntity.created(URI.create("transaction/" + savedTransaction.getId())).body(savedTransaction);

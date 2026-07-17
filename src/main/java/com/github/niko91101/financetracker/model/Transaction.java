@@ -20,7 +20,7 @@ public class Transaction {
     private Long id;
 
     @NotNull(message = "Сумма не можеть быть пустой")
-    private Integer amount;
+    private  amount;
 
     @Builder.Default
     private LocalDate date = LocalDate.now();

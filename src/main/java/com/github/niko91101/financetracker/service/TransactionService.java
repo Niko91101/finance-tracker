@@ -6,6 +6,7 @@ import com.github.niko91101.financetracker.dto.response.TransactionResponse;
 import com.github.niko91101.financetracker.enums.TypeTransactions;
 import com.github.niko91101.financetracker.exception.CategoryNotFoundException;
 import com.github.niko91101.financetracker.exception.TransactionNotFoundException;
+import com.github.niko91101.financetracker.exception.UserNotFoundException;
 import com.github.niko91101.financetracker.mapper.TransactionMapper;
 import com.github.niko91101.financetracker.model.Category;
 import com.github.niko91101.financetracker.model.Transaction;
@@ -76,7 +77,8 @@ public class TransactionService {
         transaction.setDescription(request.getDescription());
         transaction.setAmount(request.getAmount());
 
-        return transactionMapper.toResponse(transaction);
+        Transaction savedTransaction = transactionRepository.save(transaction);
+        return transactionMapper.toResponse(savedTransaction);
     }
 
     @Transactional
@@ -117,6 +119,6 @@ public class TransactionService {
 
     private User findUserOrThrow(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь с таким ID не найден"));
+                .orElseThrow(() -> new UserNotFoundException(userId));
     }
 }
