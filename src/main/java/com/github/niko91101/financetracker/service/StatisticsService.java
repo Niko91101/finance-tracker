@@ -17,20 +17,9 @@ public class StatisticsService {
 
     private final TransactionRepository transactionRepository;
 
-
     public BigDecimal getBalance(Long userId) {
-
-        List<Transaction> transactions = transactionRepository.findByUserId(userId);
-
-        BigDecimal income = transactions.stream()
-                .filter(transaction -> transaction.getCategory().getType().equals(TypeTransactions.INCOME))
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal expense = transactions.stream()
-                .filter(transaction -> transaction.getCategory().getType().equals(TypeTransactions.EXPENSE))
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal income = sumByType(userId, TypeTransactions.INCOME);
+        BigDecimal expense = sumByType(userId, TypeTransactions.EXPENSE);
 
         return income.subtract(expense);
     }
@@ -44,9 +33,7 @@ public class StatisticsService {
     }
 
     private BigDecimal sumByType(Long userId, TypeTransactions type) {
-        return transactionRepository.findByUserId(userId).stream()
-                .filter(transaction -> transaction.getCategory().getType().equals(type))
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return transactionRepository
+                .sumAmountByUserIdAndType(userId, type);
     }
 }
