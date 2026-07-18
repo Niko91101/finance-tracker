@@ -1,5 +1,6 @@
 package com.github.niko91101.financetracker.service;
 
+import com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse;
 import com.github.niko91101.financetracker.enums.TypeTransactions;
 import com.github.niko91101.financetracker.model.Transaction;
 import com.github.niko91101.financetracker.repository.TransactionRepository;
@@ -30,6 +31,10 @@ public class StatisticsService {
 
     public BigDecimal getTotalExpense(long userId) {
         return sumByType(userId, TypeTransactions.EXPENSE);
+    }
+
+    public List<CategoryStatisticsResponse> findStatisticsByUserId(Long userId) {
+        return transactionRepository.findStatisticsByUserId(userId);
     }
 
     private BigDecimal sumByType(Long userId, TypeTransactions type) {

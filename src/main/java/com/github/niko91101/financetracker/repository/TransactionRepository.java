@@ -1,5 +1,6 @@
 package com.github.niko91101.financetracker.repository;
 
+import com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse;
 import com.github.niko91101.financetracker.enums.TypeTransactions;
 import com.github.niko91101.financetracker.model.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
@@ -26,5 +26,19 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     BigDecimal sumAmountByUserIdAndType(
             @Param("userId") Long userId,
             @Param("type") TypeTransactions typeTransactions
+    );
+
+    @Query("""
+            SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
+                        c.name,
+                        SUM(t.amount)
+                        )
+            FROM Transaction  t 
+            JOIN t.category c 
+            WHERE t.user.id = :userId
+            GROUP BY c.name
+            """)
+    List<CategoryStatisticsResponse> findStatisticsByUserId(
+            @Param("userId") Long userId
     );
 }
