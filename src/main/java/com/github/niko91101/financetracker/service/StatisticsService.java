@@ -33,12 +33,28 @@ public class StatisticsService {
         return sumByType(userId, TypeTransactions.EXPENSE);
     }
 
+    public List<CategoryStatisticsResponse> findStatistics(
+            Long userId,
+            BigDecimal minAmount
+    ) {
+        if (minAmount == null) {
+            return transactionRepository.findStatisticsByUserId(userId);
+        }
+
+        return transactionRepository.findStatisticsByUserIdAndMinAmount(userId, minAmount);
+    }
     public List<CategoryStatisticsResponse> findStatisticsByUserId(Long userId) {
         return transactionRepository.findStatisticsByUserId(userId);
+    }
+
+    public List<CategoryStatisticsResponse> findStatisticsByUserIdAndMinAmount(Long userId, BigDecimal minAmount) {
+        return transactionRepository.findStatisticsByUserIdAndMinAmount(userId, minAmount);
     }
 
     private BigDecimal sumByType(Long userId, TypeTransactions type) {
         return transactionRepository
                 .sumAmountByUserIdAndType(userId, type);
     }
+
+
 }

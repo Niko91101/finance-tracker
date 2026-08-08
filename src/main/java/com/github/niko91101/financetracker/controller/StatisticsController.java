@@ -32,7 +32,8 @@ public class StatisticsController {
     }
 
     @GetMapping("/users/{userId}/categories")
-    public ResponseEntity<List<CategoryStatisticsResponse>> getStatisticsByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(statisticsService.findStatisticsByUserId(userId));
+    public ResponseEntity<List<CategoryStatisticsResponse>> getStatistics(@PathVariable Long userId,
+                                                                          @RequestParam(required = false) BigDecimal minAmount) {
+        return ResponseEntity.ok(statisticsService.findStatistics(userId, minAmount));
     }
 }
