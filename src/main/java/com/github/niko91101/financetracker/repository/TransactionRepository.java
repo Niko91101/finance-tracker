@@ -31,10 +31,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("""
             SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
                         c.name,
+                        COUNT(t),
                         SUM(t.amount)
                         )
-            FROM Transaction  t 
-            JOIN t.category c 
+            FROM Transaction  t
+            JOIN t.category c
             WHERE t.user.id = :userId
             GROUP BY c.name
             """)
@@ -45,6 +46,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("""
             SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
                         c.name,
+                        COUNT(t),
                         SUM(t.amount)
                         )
             FROM Transaction t

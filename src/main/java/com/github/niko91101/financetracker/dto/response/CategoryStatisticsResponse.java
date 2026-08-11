@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 public record CategoryStatisticsResponse(
         String categoryName,
+        Long transactionCount,
         BigDecimal totalAmount
 ) {
 }
