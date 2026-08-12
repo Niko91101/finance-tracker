@@ -38,6 +38,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             JOIN t.category c
             WHERE t.user.id = :userId
             GROUP BY c.name
+            ORDER BY SUM(t.amount) DESC
             """)
     List<CategoryStatisticsResponse> findStatisticsByUserId(
             @Param("userId") Long userId
@@ -54,9 +55,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             WHERE t.user.id = :userId
             GROUP BY c.name
             HAVING SUM(t.amount) > :minAmount
+            ORDER BY SUM(t.amount) DESC
             """)
     List<CategoryStatisticsResponse> findStatisticsByUserIdAndMinAmount(
-            Long userId,
-            BigDecimal minAmount
+            @Param("userId") Long userId,
+            @Param("minAmount") BigDecimal minAmount
     );
 }
