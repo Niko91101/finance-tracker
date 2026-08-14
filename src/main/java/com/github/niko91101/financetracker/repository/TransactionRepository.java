@@ -75,8 +75,28 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             GROUP BY c.name
             ORDER BY SUM(t.amount) DESC
             """)
-    List<CategoryStatisticsResponse> findStatisticsByUserIdAndTypeTransaction (
+    List<CategoryStatisticsResponse> findStatisticsByUserIdAndTypeTransaction(
             @Param("userId") Long userId,
             @Param("type") TypeTransactions type
+    );
+
+    @Query("""
+            SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
+                        c.name,
+                        COUNT(t),
+                        SUM(t.amount)
+                                    )
+            FROM Transaction t
+            JOIN t.category c
+            WHERE t.user.id = :userId
+                AND c.type = :type
+            GROUP BY c.name
+            HAVING SUM(t.amount) > :minAmount
+            ORDER BY SUM(t.amount) DESC
+            """)
+    List<CategoryStatisticsResponse> findStatisticsByUserIdAndTypeTransactionAndMinAmount(
+            @Param("userId") Long userId,
+            @Param("type") TypeTransactions type,
+            @Param("minAmount") BigDecimal minAmount
     );
 }

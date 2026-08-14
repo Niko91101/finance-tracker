@@ -34,15 +34,8 @@ public class StatisticsController {
 
     @GetMapping("/users/{userId}/categories")
     public ResponseEntity<List<CategoryStatisticsResponse>> getStatistics(@PathVariable Long userId,
-                                                                          @RequestParam(required = false) BigDecimal minAmount) {
-        return ResponseEntity.ok(statisticsService.findStatistics(userId, minAmount));
-    }
-
-    @GetMapping("/users/{userId}/categories")
-    public ResponseEntity<List<CategoryStatisticsResponse>> getStatisticsByUserIdAndTypeTransaction(
-            @PathVariable Long userId,
-            @RequestParam TypeTransactions type
-            ) {
-        return ResponseEntity.ok(statisticsService.findStatisticsByUserIdAndTypeTransaction(userId, type));
+                                                                          @RequestParam(required = false) BigDecimal minAmount,
+                                                                          @RequestParam(required = false) TypeTransactions type) {
+        return ResponseEntity.ok(statisticsService.findStatistics(userId, minAmount, type));
     }
 }

@@ -35,14 +35,24 @@ public class StatisticsService {
 
     public List<CategoryStatisticsResponse> findStatistics(
             Long userId,
-            BigDecimal minAmount
+            BigDecimal minAmount,
+            TypeTransactions type
     ) {
-        if (minAmount == null) {
+        if (minAmount == null && type == null) {
             return transactionRepository.findStatisticsByUserId(userId);
         }
 
-        return transactionRepository.findStatisticsByUserIdAndMinAmount(userId, minAmount);
+        if (minAmount != null && type == null) {
+            return transactionRepository.findStatisticsByUserIdAndMinAmount(userId, minAmount);
+        }
+
+        if (minAmount == null && type != null) {
+            return transactionRepository.findStatisticsByUserIdAndTypeTransaction(userId, type);
+        }
+
+        return transactionRepository.findStatisticsByUserIdAndTypeTransactionAndMinAmount(userId, type, minAmount);
     }
+
     public List<CategoryStatisticsResponse> findStatisticsByUserId(Long userId) {
         return transactionRepository.findStatisticsByUserId(userId);
     }
@@ -55,6 +65,10 @@ public class StatisticsService {
             Long userId, TypeTransactions type) {
         return transactionRepository.findStatisticsByUserIdAndTypeTransaction(userId, type);
     }
+
+//    public List<CategoryStatisticsResponse> findStatisticsByUserIdAndMinAmountAndTypeTransaction(Long userId, TypeTransactions type, BigDecimal minAmount) {
+//        return transactionRepository.findStatisticsByUserIdAndTypeTransactionAndMinAmount(userId, type, minAmount);
+//    }
 
     private BigDecimal sumByType(Long userId, TypeTransactions type) {
         return transactionRepository
