@@ -51,6 +51,11 @@ public class StatisticsService {
         return transactionRepository.findStatisticsByUserIdAndMinAmount(userId, minAmount);
     }
 
+    public List<CategoryStatisticsResponse> findStatisticsByUserIdAndTypeTransaction(
+            Long userId, TypeTransactions type) {
+        return transactionRepository.findStatisticsByUserIdAndTypeTransaction(userId, type);
+    }
+
     private BigDecimal sumByType(Long userId, TypeTransactions type) {
         return transactionRepository
                 .sumAmountByUserIdAndType(userId, type);

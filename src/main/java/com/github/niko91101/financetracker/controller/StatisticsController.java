@@ -1,6 +1,7 @@
 package com.github.niko91101.financetracker.controller;
 
 import com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse;
+import com.github.niko91101.financetracker.enums.TypeTransactions;
 import com.github.niko91101.financetracker.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,5 +36,13 @@ public class StatisticsController {
     public ResponseEntity<List<CategoryStatisticsResponse>> getStatistics(@PathVariable Long userId,
                                                                           @RequestParam(required = false) BigDecimal minAmount) {
         return ResponseEntity.ok(statisticsService.findStatistics(userId, minAmount));
+    }
+
+    @GetMapping("/users/{userId}/categories")
+    public ResponseEntity<List<CategoryStatisticsResponse>> getStatisticsByUserIdAndTypeTransaction(
+            @PathVariable Long userId,
+            @RequestParam TypeTransactions type
+            ) {
+        return ResponseEntity.ok(statisticsService.findStatisticsByUserIdAndTypeTransaction(userId, type));
     }
 }

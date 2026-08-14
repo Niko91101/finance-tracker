@@ -61,4 +61,22 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("userId") Long userId,
             @Param("minAmount") BigDecimal minAmount
     );
+
+    @Query("""
+            SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
+            c.name,
+            COUNT(t),
+            SUM(t.amount)
+            )
+            FROM Transaction t
+            JOIN t.category c
+            WHERE t.user.id = :userId
+                AND c.type = :type
+            GROUP BY c.name
+            ORDER BY SUM(t.amount) DESC
+            """)
+    List<CategoryStatisticsResponse> findStatisticsByUserIdAndTypeTransaction (
+            @Param("userId") Long userId,
+            @Param("type") TypeTransactions type
+    );
 }
