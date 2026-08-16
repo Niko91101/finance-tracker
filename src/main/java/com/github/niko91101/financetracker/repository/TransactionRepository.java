@@ -3,6 +3,9 @@ package com.github.niko91101.financetracker.repository;
 import com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse;
 import com.github.niko91101.financetracker.enums.TypeTransactions;
 import com.github.niko91101.financetracker.model.Transaction;
+import com.github.niko91101.financetracker.model.User;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -99,4 +102,25 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("type") TypeTransactions type,
             @Param("minAmount") BigDecimal minAmount
     );
+
+    @Query("""
+            SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
+            c.name,
+            COUNT(t),
+            SUM(t.amount)
+            )
+            FROM Transaction t
+            JOIN t.category c
+            WHERE t.user.id = :userId
+                AND c.type = :type
+            GROUP BY c.name
+            ORDER BY SUM(t.amount) DESC
+            """)
+    List<CategoryStatisticsResponse> findTopStatisticsByUserIdAndTypeTransaction(
+            @Param("userId") Long userId,
+            @Param("type") TypeTransactions type,
+            Pageable pageable
+    );
+
+    Long user(User user);
 }

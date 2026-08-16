@@ -38,4 +38,10 @@ public class StatisticsController {
                                                                           @RequestParam(required = false) TypeTransactions type) {
         return ResponseEntity.ok(statisticsService.findStatistics(userId, minAmount, type));
     }
+
+    @GetMapping("/users/{userId}/categories/top")
+    public ResponseEntity<CategoryStatisticsResponse> getTopStatistics(@PathVariable Long userId,
+                                                                       @RequestParam TypeTransactions type) {
+        return ResponseEntity.ok(statisticsService.findTopStatisticsByUserIdAndTypeTransaction(userId, type));
+    }
 }
