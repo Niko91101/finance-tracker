@@ -1,6 +1,7 @@
 package com.github.niko91101.financetracker.repository;
 
 import com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse;
+import com.github.niko91101.financetracker.dto.response.TransactionShortResponse;
 import com.github.niko91101.financetracker.enums.TypeTransactions;
 import com.github.niko91101.financetracker.model.Transaction;
 import com.github.niko91101.financetracker.model.User;
@@ -134,4 +135,18 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     List<Transaction> findByUserIdWithDetails(
             @Param("userId") Long userId
     );
-}
+
+    @Query("""
+            SELECT new com.github.niko91101.financetracker.dto.response.TransactionShortResponse(
+                               t.amount,
+                               t.description,
+                               c.name
+            )
+            FROM Transaction t
+            JOIN t.category c
+            WHERE t.user.id = :userId
+            """)
+    List<TransactionShortResponse> findShortTransactionByUserId(
+            @Param("userId") Long userId
+    );
+ }

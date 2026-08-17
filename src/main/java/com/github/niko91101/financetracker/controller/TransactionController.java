@@ -3,6 +3,7 @@ package com.github.niko91101.financetracker.controller;
 import com.github.niko91101.financetracker.dto.request.CreateTransactionRequest;
 import com.github.niko91101.financetracker.dto.request.UpdateTransactionRequest;
 import com.github.niko91101.financetracker.dto.response.TransactionResponse;
+import com.github.niko91101.financetracker.dto.response.TransactionShortResponse;
 import com.github.niko91101.financetracker.enums.TypeTransactions;
 import com.github.niko91101.financetracker.mapper.TransactionMapper;
 import com.github.niko91101.financetracker.model.Transaction;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.List;
 
@@ -36,10 +38,11 @@ public class TransactionController {
     @GetMapping("/filter")
     public ResponseEntity<List<TransactionResponse>> getFilteredTransactions(
             @RequestParam Long userId,
-            @RequestParam(required = false) TypeTransactions type
-    ) {
+            @RequestParam(required = false) TypeTransactions type,
+            @RequestParam(required = false)BigDecimal minAmount
+            ) {
         return ResponseEntity.ok(
-                transactionService.findTransactions(userId, type)
+                transactionService.findTransactions(userId, type, minAmount)
                         .stream()
                         .map(transactionMapper::toResponse)
                         .toList()
@@ -56,6 +59,12 @@ public class TransactionController {
                         .map(transactionMapper::toResponse)
                         .toList()
         );
+    }
+
+    @GetMapping("/short")
+    public ResponseEntity<List<TransactionShortResponse>> getShortTransaction(@RequestParam Long userId) {
+        return ResponseEntity.ok(
+                transactionService.findShortTransaction(userId));
     }
 
     @PostMapping

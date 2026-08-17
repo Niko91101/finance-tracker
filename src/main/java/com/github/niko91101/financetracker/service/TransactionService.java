@@ -3,6 +3,7 @@ package com.github.niko91101.financetracker.service;
 import com.github.niko91101.financetracker.dto.request.CreateTransactionRequest;
 import com.github.niko91101.financetracker.dto.request.UpdateTransactionRequest;
 import com.github.niko91101.financetracker.dto.response.TransactionResponse;
+import com.github.niko91101.financetracker.dto.response.TransactionShortResponse;
 import com.github.niko91101.financetracker.enums.TypeTransactions;
 import com.github.niko91101.financetracker.exception.CategoryNotFoundException;
 import com.github.niko91101.financetracker.exception.TransactionNotFoundException;
@@ -124,12 +125,17 @@ public class TransactionService {
 
     public List<Transaction> findTransactions(
             Long userId,
-            TypeTransactions type
+            TypeTransactions type,
+            BigDecimal minAmount
     ) {
         Specification<Transaction> specification = TransactionSpecification.hasUserId(userId);
 
         if (type != null) {
             specification = specification.and(TransactionSpecification.hasType(type));
+        }
+
+        if (minAmount != null) {
+            specification = specification.and(TransactionSpecification.hasMinAmount(minAmount));
         }
 
         return transactionRepository.findAll(specification);
@@ -138,6 +144,10 @@ public class TransactionService {
     //временный
     public List<Transaction> findTransactionsWithDetails(Long userId) {
         return transactionRepository.findByUserIdWithDetails(userId);
+    }
+
+    public List<TransactionShortResponse> findShortTransaction(Long userId) {
+        return transactionRepository.findShortTransactionByUserId(userId);
     }
 
     private Category findCategoryOrThrow(Long categoryId) {
