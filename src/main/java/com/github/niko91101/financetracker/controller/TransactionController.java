@@ -3,6 +3,8 @@ package com.github.niko91101.financetracker.controller;
 import com.github.niko91101.financetracker.dto.request.CreateTransactionRequest;
 import com.github.niko91101.financetracker.dto.request.UpdateTransactionRequest;
 import com.github.niko91101.financetracker.dto.response.TransactionResponse;
+import com.github.niko91101.financetracker.enums.TypeTransactions;
+import com.github.niko91101.financetracker.mapper.TransactionMapper;
 import com.github.niko91101.financetracker.model.Transaction;
 import com.github.niko91101.financetracker.service.TransactionService;
 import jakarta.validation.Valid;
@@ -19,6 +21,7 @@ import java.util.List;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final TransactionMapper transactionMapper;
 
     @GetMapping
     public ResponseEntity<List<TransactionResponse>> getAllTransactions() {
@@ -28,6 +31,31 @@ public class TransactionController {
     @GetMapping("/{id}")
     public ResponseEntity<TransactionResponse> getTransactionById(@PathVariable Long id) {
         return ResponseEntity.ok(transactionService.getTransactionalById(id));
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<TransactionResponse>> getFilteredTransactions(
+            @RequestParam Long userId,
+            @RequestParam(required = false) TypeTransactions type
+    ) {
+        return ResponseEntity.ok(
+                transactionService.findTransactions(userId, type)
+                        .stream()
+                        .map(transactionMapper::toResponse)
+                        .toList()
+        );
+    }
+
+    @GetMapping("/with-details")
+    public ResponseEntity<List<TransactionResponse>> getTransactionsWithDetails(
+            @RequestParam Long userId
+    ) {
+        return ResponseEntity.ok(
+                transactionService.findTransactionsWithDetails(userId)
+                        .stream()
+                        .map(transactionMapper::toResponse)
+                        .toList()
+        );
     }
 
     @PostMapping

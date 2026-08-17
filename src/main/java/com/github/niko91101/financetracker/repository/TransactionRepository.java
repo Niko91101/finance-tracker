@@ -4,9 +4,9 @@ import com.github.niko91101.financetracker.dto.response.CategoryStatisticsRespon
 import com.github.niko91101.financetracker.enums.TypeTransactions;
 import com.github.niko91101.financetracker.model.Transaction;
 import com.github.niko91101.financetracker.model.User;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -15,7 +15,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
-public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+public interface TransactionRepository extends JpaRepository<Transaction, Long>,
+        JpaSpecificationExecutor<Transaction> {
 
     List<Transaction> findByUserId(Long userId);
 
@@ -122,5 +123,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             Pageable pageable
     );
 
-    Long user(User user);
+    //временный
+    @Query("""
+            SELECT t
+            FROM Transaction t
+            JOIN FETCH t.category c
+            JOIN FETCH t.user u
+            WHERE t.user.id = :userId
+            """)
+    List<Transaction> findByUserIdWithDetails(
+            @Param("userId") Long userId
+    );
 }

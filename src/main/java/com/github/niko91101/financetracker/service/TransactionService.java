@@ -14,8 +14,10 @@ import com.github.niko91101.financetracker.model.User;
 import com.github.niko91101.financetracker.repository.CategoryRepository;
 import com.github.niko91101.financetracker.repository.TransactionRepository;
 import com.github.niko91101.financetracker.repository.UserRepository;
+import com.github.niko91101.financetracker.specification.TransactionSpecification;
 import com.github.niko91101.financetracker.validation.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -118,6 +120,24 @@ public class TransactionService {
                                 BigDecimal::add
                         )
                 ));
+    }
+
+    public List<Transaction> findTransactions(
+            Long userId,
+            TypeTransactions type
+    ) {
+        Specification<Transaction> specification = TransactionSpecification.hasUserId(userId);
+
+        if (type != null) {
+            specification = specification.and(TransactionSpecification.hasType(type));
+        }
+
+        return transactionRepository.findAll(specification);
+    }
+
+    //временный
+    public List<Transaction> findTransactionsWithDetails(Long userId) {
+        return transactionRepository.findByUserIdWithDetails(userId);
     }
 
     private Category findCategoryOrThrow(Long categoryId) {
