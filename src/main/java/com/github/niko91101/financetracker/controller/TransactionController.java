@@ -49,18 +49,6 @@ public class TransactionController {
         );
     }
 
-    @GetMapping("/with-details")
-    public ResponseEntity<List<TransactionResponse>> getTransactionsWithDetails(
-            @RequestParam Long userId
-    ) {
-        return ResponseEntity.ok(
-                transactionService.findTransactionsWithDetails(userId)
-                        .stream()
-                        .map(transactionMapper::toResponse)
-                        .toList()
-        );
-    }
-
     @GetMapping("/short")
     public ResponseEntity<List<TransactionShortResponse>> getShortTransaction(@RequestParam Long userId) {
         return ResponseEntity.ok(

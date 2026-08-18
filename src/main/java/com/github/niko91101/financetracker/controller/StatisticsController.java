@@ -42,6 +42,6 @@ public class StatisticsController {
     @GetMapping("/users/{userId}/categories/top")
     public ResponseEntity<CategoryStatisticsResponse> getTopStatistics(@PathVariable Long userId,
                                                                        @RequestParam TypeTransactions type) {
-        return ResponseEntity.ok(statisticsService.findTopStatisticsByUserIdAndTypeTransaction(userId, type));
+        return ResponseEntity.ok(statisticsService.findTopStatisticsByUserIdAndCategoryType(userId, type));
     }
 }

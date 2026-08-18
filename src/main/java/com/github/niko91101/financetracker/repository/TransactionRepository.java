@@ -4,7 +4,6 @@ import com.github.niko91101.financetracker.dto.response.CategoryStatisticsRespon
 import com.github.niko91101.financetracker.dto.response.TransactionShortResponse;
 import com.github.niko91101.financetracker.enums.TypeTransactions;
 import com.github.niko91101.financetracker.model.Transaction;
-import com.github.niko91101.financetracker.model.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -22,11 +21,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     List<Transaction> findByUserId(Long userId);
 
     @Query("""
-                    SELECT COALESCE(SUM(t.amount), 0)
-                    FROM Transaction t
-                    JOIN t.category c
-                    WHERE t.user.id = :userId
-                    AND c.type = :type
+             SELECT COALESCE(SUM(t.amount), 0)
+             FROM Transaction t
+             JOIN t.category c
+             WHERE t.user.id = :userId
+                AND c.type = :type
             """)
     BigDecimal sumAmountByUserIdAndType(
             @Param("userId") Long userId,
@@ -51,10 +50,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
 
     @Query("""
             SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
-                        c.name,
-                        COUNT(t),
-                        SUM(t.amount)
-                        )
+                c.name,
+                COUNT(t),
+                SUM(t.amount)
+            )
             FROM Transaction t
             JOIN t.category c
             WHERE t.user.id = :userId
@@ -69,9 +68,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
 
     @Query("""
             SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
-            c.name,
-            COUNT(t),
-            SUM(t.amount)
+                c.name,
+                COUNT(t),
+                SUM(t.amount)
             )
             FROM Transaction t
             JOIN t.category c
@@ -87,10 +86,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
 
     @Query("""
             SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
-                        c.name,
-                        COUNT(t),
-                        SUM(t.amount)
-                                    )
+                c.name,
+                COUNT(t),
+                SUM(t.amount)
+            )
             FROM Transaction t
             JOIN t.category c
             WHERE t.user.id = :userId
@@ -107,9 +106,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
 
     @Query("""
             SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
-            c.name,
-            COUNT(t),
-            SUM(t.amount)
+                c.name,
+                COUNT(t),
+                SUM(t.amount)
             )
             FROM Transaction t
             JOIN t.category c
@@ -118,29 +117,17 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
             GROUP BY c.name
             ORDER BY SUM(t.amount) DESC
             """)
-    List<CategoryStatisticsResponse> findTopStatisticsByUserIdAndTypeTransaction(
+    List<CategoryStatisticsResponse> findTopStatisticsByUserIdAndCategoryType(
             @Param("userId") Long userId,
             @Param("type") TypeTransactions type,
             Pageable pageable
     );
 
-    //временный
-    @Query("""
-            SELECT t
-            FROM Transaction t
-            JOIN FETCH t.category c
-            JOIN FETCH t.user u
-            WHERE t.user.id = :userId
-            """)
-    List<Transaction> findByUserIdWithDetails(
-            @Param("userId") Long userId
-    );
-
     @Query("""
             SELECT new com.github.niko91101.financetracker.dto.response.TransactionShortResponse(
-                               t.amount,
-                               t.description,
-                               c.name
+                t.amount,
+                t.description,
+                c.name
             )
             FROM Transaction t
             JOIN t.category c
@@ -149,4 +136,4 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     List<TransactionShortResponse> findShortTransactionByUserId(
             @Param("userId") Long userId
     );
- }
+}

@@ -141,11 +141,6 @@ public class TransactionService {
         return transactionRepository.findAll(specification);
     }
 
-    //временный
-    public List<Transaction> findTransactionsWithDetails(Long userId) {
-        return transactionRepository.findByUserIdWithDetails(userId);
-    }
-
     public List<TransactionShortResponse> findShortTransaction(Long userId) {
         return transactionRepository.findShortTransactionByUserId(userId);
     }
