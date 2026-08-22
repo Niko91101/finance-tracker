@@ -39,19 +39,7 @@ public class StatisticsService {
             BigDecimal minAmount,
             TypeTransactions type
     ) {
-        if (minAmount == null && type == null) {
-            return transactionRepository.findStatisticsByUserId(userId);
-        }
-
-        if (minAmount != null && type == null) {
-            return transactionRepository.findStatisticsByUserIdAndMinAmount(userId, minAmount);
-        }
-
-        if (minAmount == null && type != null) {
-            return transactionRepository.findStatisticsByUserIdAndTypeTransaction(userId, type);
-        }
-
-        return transactionRepository.findStatisticsByUserIdAndTypeTransactionAndMinAmount(userId, type, minAmount);
+        return transactionRepository.findStatistics(userId, type, minAmount);
     }
 
     public CategoryStatisticsResponse findTopStatisticsByUserIdAndCategoryType(Long userId, TypeTransactions type) {

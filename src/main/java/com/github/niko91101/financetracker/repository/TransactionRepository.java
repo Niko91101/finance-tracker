@@ -21,87 +21,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     List<Transaction> findByUserId(Long userId);
 
     @Query("""
-             SELECT COALESCE(SUM(t.amount), 0)
-             FROM Transaction t
-             JOIN t.category c
-             WHERE t.user.id = :userId
+            SELECT COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            JOIN t.category c
+            WHERE t.user.id = :userId
                 AND c.type = :type
             """)
     BigDecimal sumAmountByUserIdAndType(
             @Param("userId") Long userId,
-            @Param("type") TypeTransactions typeTransactions
-    );
-
-    @Query("""
-            SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
-                        c.name,
-                        COUNT(t),
-                        SUM(t.amount)
-                        )
-            FROM Transaction  t
-            JOIN t.category c
-            WHERE t.user.id = :userId
-            GROUP BY c.name
-            ORDER BY SUM(t.amount) DESC
-            """)
-    List<CategoryStatisticsResponse> findStatisticsByUserId(
-            @Param("userId") Long userId
-    );
-
-    @Query("""
-            SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
-                c.name,
-                COUNT(t),
-                SUM(t.amount)
-            )
-            FROM Transaction t
-            JOIN t.category c
-            WHERE t.user.id = :userId
-            GROUP BY c.name
-            HAVING SUM(t.amount) > :minAmount
-            ORDER BY SUM(t.amount) DESC
-            """)
-    List<CategoryStatisticsResponse> findStatisticsByUserIdAndMinAmount(
-            @Param("userId") Long userId,
-            @Param("minAmount") BigDecimal minAmount
-    );
-
-    @Query("""
-            SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
-                c.name,
-                COUNT(t),
-                SUM(t.amount)
-            )
-            FROM Transaction t
-            JOIN t.category c
-            WHERE t.user.id = :userId
-                AND c.type = :type
-            GROUP BY c.name
-            ORDER BY SUM(t.amount) DESC
-            """)
-    List<CategoryStatisticsResponse> findStatisticsByUserIdAndTypeTransaction(
-            @Param("userId") Long userId,
             @Param("type") TypeTransactions type
-    );
-
-    @Query("""
-            SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
-                c.name,
-                COUNT(t),
-                SUM(t.amount)
-            )
-            FROM Transaction t
-            JOIN t.category c
-            WHERE t.user.id = :userId
-                AND c.type = :type
-            GROUP BY c.name
-            HAVING SUM(t.amount) > :minAmount
-            ORDER BY SUM(t.amount) DESC
-            """)
-    List<CategoryStatisticsResponse> findStatisticsByUserIdAndTypeTransactionAndMinAmount(
-            @Param("userId") Long userId,
-            @Param("type") TypeTransactions type,
-            @Param("minAmount") BigDecimal minAmount
     );
 
     @Query("""
@@ -135,5 +63,25 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
             """)
     List<TransactionShortResponse> findShortTransactionByUserId(
             @Param("userId") Long userId
+    );
+
+    @Query("""
+            SELECT new com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse(
+                c.name,
+                COUNT(t),
+                SUM(t.amount)
+            )
+            FROM Transaction t
+            JOIN t.category c
+            WHERE t.user.id = :userId
+                AND (:type IS NULL OR c.type = :type)
+            GROUP BY c.name
+            HAVING (:minAmount IS NULL OR SUM(t.amount) > :minAmount)
+            ORDER BY SUM(t.amount) DESC
+            """)
+    List<CategoryStatisticsResponse> findStatistics(
+            @Param("userId") Long userId,
+            @Param("type") TypeTransactions type,
+            @Param("minAmount") BigDecimal minAmount
     );
 }
