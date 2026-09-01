@@ -18,9 +18,12 @@ import com.github.niko91101.financetracker.repository.UserRepository;
 import com.github.niko91101.financetracker.specification.TransactionSpecification;
 import com.github.niko91101.financetracker.validation.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -34,6 +37,7 @@ public class TransactionService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final TransactionMapper transactionMapper;
+    private final EntityManager entityManager;
 
     @Transactional(readOnly = true)
     public List<TransactionResponse> getAllTransaction() {
@@ -123,10 +127,11 @@ public class TransactionService {
                 ));
     }
 
-    public List<Transaction> findTransactions(
+    public Page<Transaction> findTransactions(
             Long userId,
             TypeTransactions type,
-            BigDecimal minAmount
+            BigDecimal minAmount,
+            Pageable pageable
     ) {
         Specification<Transaction> specification = TransactionSpecification.hasUserId(userId);
 
@@ -138,11 +143,23 @@ public class TransactionService {
             specification = specification.and(TransactionSpecification.hasMinAmount(minAmount));
         }
 
-        return transactionRepository.findAll(specification);
+        return transactionRepository.findAll(specification, pageable);
     }
 
     public List<TransactionShortResponse> findShortTransaction(Long userId) {
         return transactionRepository.findShortTransactionByUserId(userId);
+    }
+
+    //временный
+    @Transactional
+    public void entityManagerExperiment(Long id) {
+        Transaction first = entityManager.find(Transaction.class, id);
+
+        entityManager.clear();
+
+        Transaction second = entityManager.find(Transaction.class, id);
+
+        System.out.println(first == second);
     }
 
     private Category findCategoryOrThrow(Long categoryId) {
