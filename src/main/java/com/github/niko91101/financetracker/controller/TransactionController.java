@@ -10,6 +10,8 @@ import com.github.niko91101.financetracker.model.Transaction;
 import com.github.niko91101.financetracker.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,16 +38,15 @@ public class TransactionController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<TransactionResponse>> getFilteredTransactions(
+    public ResponseEntity<Page<TransactionResponse>> getFilteredTransactions(
             @RequestParam Long userId,
             @RequestParam(required = false) TypeTransactions type,
-            @RequestParam(required = false)BigDecimal minAmount
+            @RequestParam(required = false)BigDecimal minAmount,
+            Pageable pageable
             ) {
         return ResponseEntity.ok(
-                transactionService.findTransactions(userId, type, minAmount)
-                        .stream()
+                transactionService.findTransactions(userId, type, minAmount, pageable)
                         .map(transactionMapper::toResponse)
-                        .toList()
         );
     }
 
