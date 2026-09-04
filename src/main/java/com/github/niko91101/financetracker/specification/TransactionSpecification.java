@@ -2,11 +2,9 @@ package com.github.niko91101.financetracker.specification;
 
 import com.github.niko91101.financetracker.enums.TypeTransactions;
 import com.github.niko91101.financetracker.model.Transaction;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 public class TransactionSpecification {
 

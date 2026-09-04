@@ -4,7 +4,9 @@ import com.github.niko91101.financetracker.IntegrationTestBase;
 import com.github.niko91101.financetracker.dto.response.CategoryStatisticsResponse;
 import com.github.niko91101.financetracker.enums.TypeTransactions;
 import com.github.niko91101.financetracker.model.Category;
+import com.github.niko91101.financetracker.model.Transaction;
 import com.github.niko91101.financetracker.model.User;
+import com.github.niko91101.financetracker.specification.TransactionSpecification;
 import com.github.niko91101.financetracker.util.CategoryTestFactory;
 import com.github.niko91101.financetracker.util.TransactionTestFactory;
 import com.github.niko91101.financetracker.util.UserTestFactory;
@@ -14,12 +16,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(
@@ -86,7 +92,7 @@ public class TransactionRepositoryTest extends IntegrationTestBase {
 
         transactionRepository.save(
                 TransactionTestFactory.createTransaction(
-                        new BigDecimal("50000"),
+                        new BigDecimal("50000.00"),
                         "Описание четвертой транзакции",
                         user,
                         salary
@@ -185,5 +191,70 @@ public class TransactionRepositoryTest extends IntegrationTestBase {
         );
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Должен вернуть первую страницу отфильтрованных транзакций ")
+    void shouldReturnFirstPageOfFilteredTransaction() {
+        Pageable pageable = PageRequest.of(0, 2);
+        Specification<Transaction> specification = TransactionSpecification.hasUserId(user.getId());
+
+        Page<Transaction> result = transactionRepository.findAll(specification, pageable);
+
+        assertEquals(4, result.getTotalElements());
+        assertEquals(2, result.getTotalPages());
+        assertEquals(0, result.getNumber());
+        assertEquals(2, result.getNumberOfElements());
+        assertTrue(result.isFirst());
+        assertFalse(result.isLast());
+    }
+
+    @Test
+    @DisplayName("Должен вернуть вторую страницу отфильтрованных транзакций")
+    void shouldReturnSecondPageOfFilteredTransaction() {
+        Specification<Transaction> specification = TransactionSpecification.hasUserId(user.getId());
+        Pageable pageable = PageRequest.of(1, 2);
+
+        Page<Transaction> result = transactionRepository.findAll(specification, pageable);
+
+        assertEquals(4, result.getTotalElements());
+        assertEquals(2, result.getTotalPages());
+        assertEquals(1, result.getNumber());
+        assertEquals(2, result.getNumberOfElements());
+        assertTrue(result.isLast());
+        assertFalse(result.isFirst());
+    }
+
+    @Test
+    @DisplayName("Должен вернуть отфильтрованные транзакции  отсортированные в обратном порядке по сумме")
+    void shouldReturnPageOfFilteredTransactionWithReverseSort() {
+        Specification<Transaction> specification = TransactionSpecification.hasUserId(user.getId());
+        Pageable pageable = PageRequest.of(0, 4, Sort.by("amount").reverse());
+
+        Page<Transaction> result = transactionRepository.findAll(specification, pageable);
+
+        assertEquals(new BigDecimal("50000.00"), result.getContent().getFirst().getAmount());
+        assertEquals(new BigDecimal("700.00"), result.getContent().get(1).getAmount());
+        assertEquals(new BigDecimal("500.00"), result.getContent().get(2).getAmount());
+        assertEquals(new BigDecimal("300.00"), result.getContent().getLast().getAmount());
+    }
+
+    @Test
+    @DisplayName("Должен вернуть отфильтрованные транзакции с типом EXPENSE отсортированные в " +
+            "обратном порядке по полю amount")
+    void shouldReturnPageOfFilteredExpenseWithReverseSort() {
+        Specification<Transaction> specification = TransactionSpecification.hasUserId(user.getId());
+        specification = specification.and(TransactionSpecification.hasType(TypeTransactions.EXPENSE));
+        Pageable pageable = PageRequest.of(0, 2, Sort.Direction.DESC, "amount");
+
+        Page<Transaction> result = transactionRepository.findAll(specification, pageable);
+
+        assertEquals(new BigDecimal("700.00"), result.getContent().getFirst().getAmount());
+        assertEquals(new BigDecimal("500.00"), result.getContent().get(1).getAmount());
+
+        assertEquals(3, result.getTotalElements());
+        assertEquals(2, result.getTotalPages());
+        assertEquals(0, result.getNumber());
+        assertEquals(2, result.getNumberOfElements());
     }
 }
