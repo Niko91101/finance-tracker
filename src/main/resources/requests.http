@@ -1,7 +1,11 @@
 GET http://localhost:8080/transaction/filter?userId=11&page=0&size=2
 
 ###
+GET http://localhost:8080/transaction/filter?userId=11&page=0&size=2&sort=amount,desc
 
 ###
-
 GET http://localhost:8080/transaction/filter?userId=11&page=0&size=2&sort=amount,desc
+###
+GET http://localhost:8080/transaction/filter?userId=11&page=5&size=2&sort=amount,desc
+###
+GET http://localhost:8080/transaction/filter?userId=11&type=EXPENSE&page=0&size=2&sort=amount,desc
