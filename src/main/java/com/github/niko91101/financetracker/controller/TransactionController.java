@@ -56,13 +56,6 @@ public class TransactionController {
                 transactionService.findShortTransaction(userId));
     }
 
-    //временный
-    @GetMapping("/experiment/{id}")
-    public ResponseEntity<Void> experiment(@PathVariable Long id) {
-        transactionService.entityManagerExperiment(id);
-        return ResponseEntity.ok().build();
-    }
-
     @PostMapping
     public ResponseEntity<TransactionResponse> saveTransaction(@Valid @RequestBody CreateTransactionRequest transaction) {
         TransactionResponse savedTransaction = transactionService.saveTransaction(transaction);

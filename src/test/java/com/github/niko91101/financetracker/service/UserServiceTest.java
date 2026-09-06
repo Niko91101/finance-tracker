@@ -3,6 +3,7 @@ package com.github.niko91101.financetracker.service;
 import com.github.niko91101.financetracker.dto.request.CreateUserRequest;
 import com.github.niko91101.financetracker.dto.request.UpdateUserRequest;
 import com.github.niko91101.financetracker.dto.response.UserResponse;
+import com.github.niko91101.financetracker.exception.UserNotFoundException;
 import com.github.niko91101.financetracker.mapper.UserMapper;
 import com.github.niko91101.financetracker.repository.UserRepository;
 import org.junit.jupiter.api.*;
@@ -73,12 +74,12 @@ public class UserServiceTest {
         }
 
         @Test
-        @DisplayName("Должен выбросить исключение IllegalArgumentException, когда пользователь не найден")
+        @DisplayName("Должен выбросить исключение UserNotFoundException, когда пользователь не найден")
         void shouldThrowExceptionWhenNotFound() {
             when(userRepository.findById(99L))
                     .thenReturn(Optional.empty());
 
-            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            UserNotFoundException ex = assertThrows(UserNotFoundException.class,
                     () -> userService.getUserById(99L));
 
             assertTrue(ex.getMessage().contains("99"));
@@ -88,7 +89,7 @@ public class UserServiceTest {
         }
 
         @Test
-        @DisplayName("Должен выбросить IllegalArgumentException когда передан null вместно id")
+        @DisplayName("Должен выбросить IllegalArgumentException когда передан null вместо id")
         void shouldThrowExceptionWhenIdIsNull() {
             assertThrows(IllegalArgumentException.class,
                     () -> userService.getUserById(null));
@@ -162,13 +163,8 @@ public class UserServiceTest {
         @DisplayName("Должен изменить пользователя и вернуть UserResponse")
         void shouldUpdateUser() {
 
-            when(userRepository.existsById(1L))
-                    .thenReturn(true);
-            when(userMapper.toEntity(request))
-                    .thenReturn(userEntity);
-
-            when(userRepository.save(any()))
-                    .thenReturn(userEntity);
+            when(userRepository.findById(1L))
+                    .thenReturn(Optional.of(userEntity));
 
             when(userMapper.toResponse(userEntity))
                     .thenReturn(userResponse);
@@ -177,24 +173,19 @@ public class UserServiceTest {
             UserResponse result = userService.updateUser(1L, request);
 
             assertNotNull(result);
-
-            ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-            verify(userRepository).save(captor.capture());
-
-            assertEquals(1L, captor.getValue().getId());
         }
 
         @Test
         @DisplayName("Должен выбросить исключения IllegalArgumentException когда пользователь не найден")
         void shouldThrowWhenUserNotFound() {
-            when(userRepository.existsById(99L))
-                    .thenReturn(false);
+            when(userRepository.findById(99L))
+                    .thenReturn(Optional.empty());
 
-            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            UserNotFoundException ex = assertThrows(UserNotFoundException.class,
                     () -> userService.updateUser(99L, request));
 
             assertTrue(ex.getMessage().contains("99"));
-            verify(userRepository).existsById(99L);
+            verify(userRepository).findById(99L);
             verify(userRepository, never()).save(any());
             verifyNoInteractions(userMapper);
         }

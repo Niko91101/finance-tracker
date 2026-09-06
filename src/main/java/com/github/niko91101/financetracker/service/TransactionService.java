@@ -90,10 +90,13 @@ public class TransactionService {
 
     @Transactional
     public void deleteTransaction(Long id) {
-
         ValidationUtil.validate(id);
 
-        transactionRepository.deleteById(id);
+        Transaction transaction = transactionRepository.findById(id)
+                        .orElseThrow(() -> new TransactionNotFoundException(id));
+
+
+        transactionRepository.delete(transaction);
     }
 
     public BigDecimal sumTransactionsWithAmountMore500(List<Transaction> transactions) {
@@ -148,18 +151,6 @@ public class TransactionService {
 
     public List<TransactionShortResponse> findShortTransaction(Long userId) {
         return transactionRepository.findShortTransactionByUserId(userId);
-    }
-
-    //временный
-    @Transactional
-    public void entityManagerExperiment(Long id) {
-        Transaction first = entityManager.find(Transaction.class, id);
-
-        entityManager.clear();
-
-        Transaction second = entityManager.find(Transaction.class, id);
-
-        System.out.println(first == second);
     }
 
     private Category findCategoryOrThrow(Long categoryId) {

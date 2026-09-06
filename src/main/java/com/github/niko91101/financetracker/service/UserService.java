@@ -3,6 +3,7 @@ package com.github.niko91101.financetracker.service;
 import com.github.niko91101.financetracker.dto.request.CreateUserRequest;
 import com.github.niko91101.financetracker.dto.request.UpdateUserRequest;
 import com.github.niko91101.financetracker.dto.response.UserResponse;
+import com.github.niko91101.financetracker.exception.UserNotFoundException;
 import com.github.niko91101.financetracker.mapper.UserMapper;
 import com.github.niko91101.financetracker.model.User;
 import com.github.niko91101.financetracker.repository.UserRepository;
@@ -23,7 +24,7 @@ public class UserService {
         ValidationUtil.validate(id);
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Пользователя с  id: " + id + " не найдено!" ));
+                .orElseThrow(() -> new UserNotFoundException(id));
 
         return userMapper.toResponse(user);
     }
@@ -40,21 +41,22 @@ public class UserService {
     public UserResponse updateUser(Long id, UpdateUserRequest updateUser) {
         ValidationUtil.validate(updateUser);
 
-        if (!userRepository.existsById(id)) {
-            throw new IllegalArgumentException("Пользователя с id: " + id + " нет");
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
 
-        User updatedUser = userMapper.toEntity(updateUser);
-        updatedUser.setId(id);
-        User savedUser = userRepository.save(updatedUser);
+        user.setUsername(updateUser.getUsername());
+        user.setPassword(updateUser.getPassword());
 
-        return userMapper.toResponse(savedUser);
+        return userMapper.toResponse(user);
     }
 
     @Transactional
     public void deleteUser(Long id) {
         ValidationUtil.validate(id);
-        userRepository.deleteById(id);
-    }
 
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        userRepository.delete(user);
+    }
 }
