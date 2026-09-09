@@ -16,6 +16,7 @@ public class TransactionMapper {
                 .id(transaction.getId())
                 .amount(transaction.getAmount())
                 .description(transaction.getDescription())
+                .date(transaction.getDate())
                 .category(CategoryResponse.builder()
                         .id(transaction.getCategory().getId())
                         .name(transaction.getCategory().getName())
