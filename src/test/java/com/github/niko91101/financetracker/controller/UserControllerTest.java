@@ -1,6 +1,7 @@
 package com.github.niko91101.financetracker.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.niko91101.financetracker.dto.request.CreateUserRequest;
 import com.github.niko91101.financetracker.dto.response.UserResponse;
 import com.github.niko91101.financetracker.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -9,11 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @WebMvcTest(UserController.class)
 @ImportAutoConfiguration(JacksonAutoConfiguration.class)
@@ -43,4 +49,23 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.username").value("Стасик"))
                 .andDo(print());
     }
+
+    @Test
+    void shouldReturnBadRequestWhenCreatedUserRequestIsInvalid() throws Exception {
+
+        CreateUserRequest request = CreateUserRequest.builder()
+                .username("")
+                .password("")
+                .build();
+        mockMvc.perform(
+                        post("/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+        verify(userService, never()).saveUser(any(CreateUserRequest.class));
+    }
+
 }

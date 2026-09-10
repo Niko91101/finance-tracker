@@ -4,6 +4,7 @@ import com.github.niko91101.financetracker.dto.request.CreateUserRequest;
 import com.github.niko91101.financetracker.dto.request.UpdateUserRequest;
 import com.github.niko91101.financetracker.dto.response.UserResponse;
 import com.github.niko91101.financetracker.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponse> addUser(@RequestBody CreateUserRequest user) {
+    public ResponseEntity<UserResponse> addUser(@Valid @RequestBody CreateUserRequest user) {
         UserResponse savedUser = userService.saveUser(user);
         return ResponseEntity.created(URI.create("/users/" + savedUser.getId())).body(savedUser);
     }
