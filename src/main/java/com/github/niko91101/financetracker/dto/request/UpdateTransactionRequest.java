@@ -14,13 +14,13 @@ import java.math.BigDecimal;
 @Builder
 public class UpdateTransactionRequest {
     @NotNull(message = "Сумма не может быть пустой")
-    @Positive
+    @Positive(message = "Сумма должна быть положительной")
     private BigDecimal amount;
 
     @Size(min = 5, max = 50, message = "Описание должно быть от 5 до 50 символов")
     private String description;
 
     @NotNull(message = "ID категории не может быть пустым")
-    @Positive
+    @Positive(message = "ID категории должно быть положительное")
     private Long categoryId;
 }
