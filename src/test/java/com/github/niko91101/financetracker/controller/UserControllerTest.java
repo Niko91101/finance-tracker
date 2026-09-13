@@ -2,8 +2,10 @@ package com.github.niko91101.financetracker.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.niko91101.financetracker.dto.request.CreateUserRequest;
+import com.github.niko91101.financetracker.dto.request.UpdateUserRequest;
 import com.github.niko91101.financetracker.dto.response.UserResponse;
 import com.github.niko91101.financetracker.service.UserService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @WebMvcTest(UserController.class)
@@ -66,6 +66,25 @@ public class UserControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(userService, never()).saveUser(any(CreateUserRequest.class));
+    }
+
+    @Test
+    @DisplayName(value = "Должен вернуть 400 при некорректных данных при UpdateUser")
+    void shouldReturnBadRequestWhenUpdateUserRequestIsInvalid() throws Exception {
+
+        UpdateUserRequest request = UpdateUserRequest.builder()
+                .username("")
+                .password("")
+                .build();
+
+        mockMvc.perform(
+                put("/users/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        )
+                .andExpect(status().isBadRequest());
+
+        verify(userService, never()).updateUser(eq(1L), any(UpdateUserRequest.class));
     }
 
 }
