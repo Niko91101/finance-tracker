@@ -1,12 +1,11 @@
 package com.github.niko91101.financetracker.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.niko91101.financetracker.dto.request.CreateUserRequest;
+import com.github.niko91101.financetracker.dto.request.UpdateUserRequest;
 import com.github.niko91101.financetracker.dto.response.UserResponse;
 import com.github.niko91101.financetracker.exception.UserNotFoundException;
 import com.github.niko91101.financetracker.service.UserService;
-import com.github.niko91101.financetracker.util.UserTestFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -21,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-
 import static org.mockito.Mockito.*;
 
 @WebMvcTest(UserController.class)
@@ -44,7 +42,7 @@ public class UserControllerTest {
                 .username("Стасик")
                 .build();
 
-        Mockito.when(userService.getUserById(1L)).thenReturn(response);
+        when(userService.getUserById(1L)).thenReturn(response);
 
         mockMvc.perform(get("/users/1"))
                 .andExpect(status().isOk())
@@ -105,5 +103,24 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.method").value("GET"))
                 .andExpect(jsonPath("$.path").value("/users/99"))
                 .andExpect(jsonPath("$.fieldErrors").isEmpty());
+    }
+
+    @Test
+    @DisplayName(value = "Должен вернуть 400 при некорректных данных при UpdateUser")
+    void shouldReturnBadRequestWhenUpdateUserRequestIsInvalid() throws Exception {
+
+        UpdateUserRequest request = UpdateUserRequest.builder()
+                .username("")
+                .password("")
+                .build();
+
+        mockMvc.perform(
+                put("/users/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        )
+                .andExpect(status().isBadRequest());
+
+        verify(userService, never()).updateUser(eq(1L), any(UpdateUserRequest.class));
     }
 }
