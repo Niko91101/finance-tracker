@@ -16,7 +16,6 @@ import com.github.niko91101.financetracker.model.User;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -155,12 +154,12 @@ public class UserServiceTest {
         void setup() {
             request = UpdateUserRequest.builder()
                     .username("Стасик")
-                    .password("secret")
+                    .password("newSecret")
                     .build();
         }
 
         @Test
-        @DisplayName("Должен изменить пользователя и вернуть UserResponse")
+        @DisplayName("Должен обновить пользователя пользователя без вызова save")
         void shouldUpdateUser() {
 
             when(userRepository.findById(1L))
@@ -171,8 +170,14 @@ public class UserServiceTest {
 
 
             UserResponse result = userService.updateUser(1L, request);
+            assertEquals("newSecret", userEntity.getPassword());
+            assertEquals("Стасик", userEntity.getUsername());
 
-            assertNotNull(result);
+            verify(userRepository).findById(1L);
+            verify(userRepository, never()).save(any());
+            verify(userMapper).toResponse(userEntity);
+
+            assertSame(userResponse, result);
         }
 
         @Test
