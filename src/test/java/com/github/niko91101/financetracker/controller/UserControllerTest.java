@@ -8,7 +8,6 @@ import com.github.niko91101.financetracker.exception.UserNotFoundException;
 import com.github.niko91101.financetracker.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -76,6 +75,19 @@ public class UserControllerTest {
     }
 
     @Test
+    @DisplayName(value = "Должен вернуть код 400 при некорректном ID")
+    void shouldReturnBadRequestWhenGetUserRequestIsInvalid() throws Exception {
+
+        mockMvc.perform(get("/users/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.method").value("GET"))
+                .andExpect(jsonPath("$.path").value("/users/abc"))
+                .andExpect(jsonPath("$.message")
+                        .value("Некорректное значение параметра: id"));
+    }
+
+    @Test
     @DisplayName(value = "Должен вернуть ApiError при отсутствии пользователя")
     void shouldReturnApiErrorWhenUserNotFound() throws Exception {
 
@@ -115,10 +127,10 @@ public class UserControllerTest {
                 .build();
 
         mockMvc.perform(
-                put("/users/{id}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-        )
+                        put("/users/{id}", 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
                 .andExpect(status().isBadRequest());
 
         verify(userService, never()).updateUser(eq(1L), any(UpdateUserRequest.class));
