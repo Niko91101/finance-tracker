@@ -135,4 +135,23 @@ public class UserControllerTest {
 
         verify(userService, never()).updateUser(eq(1L), any(UpdateUserRequest.class));
     }
+
+    @Test
+    @DisplayName(value = "Должен вернуть 400, когда JSON некорректно сформирован")
+    void shouldReturnBadRequestWhenJsonIsMalformed() throws Exception {
+
+        mockMvc.perform(
+                put("/users/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username": "Стасик",
+                                  "password": "secret"
+                                """)
+        )
+                .andExpect(status().isBadRequest());
+
+        verify(userService, never())
+                .updateUser(anyLong(), any(UpdateUserRequest.class));
+    }
 }
