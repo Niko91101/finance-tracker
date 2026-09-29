@@ -8,13 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiError> handleNotFound(NotFoundException exception, HttpServletRequest request) {
@@ -51,41 +51,31 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiError> handleHttpMessageNotReadableException(HttpMessageNotReadableException e, HttpServletRequest request) {
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+
+        ServletWebRequest servletWebRequest = (ServletWebRequest) request;
+        HttpServletRequest httpRequest = servletWebRequest.getRequest();
 
         ApiError error = new ApiError(
                 LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "JSON некорректно сформирован",
-                request.getMethod(),
-                request.getRequestURI(),
+                status.value(),
+                "Отсутствует обязательный параметр: " + ex.getParameterName(),
+                httpRequest.getMethod(),
+                httpRequest.getRequestURI(),
                 Map.of()
         );
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        return new ResponseEntity<>(error, headers, status);
     }
 
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ApiError> handleMissingServletRequestParameterException(MissingServletRequestParameterException e, HttpServletRequest request) {
-
-        ApiError error = new ApiError(
-                LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Отсутствует обязательный параметр: userId",
-                request.getMethod(),
-                request.getRequestURI(),
-                Map.of()
-        );
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-    }
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleValidationException(MethodArgumentNotValidException e,
-                                                              HttpServletRequest request) {
-        Map<String, List<String>> fieldErrors = e.getBindingResult()
+        ServletWebRequest servletWebRequest = (ServletWebRequest) request;
+        HttpServletRequest httpRequest = servletWebRequest.getRequest();
+
+        Map<String, List<String>> fieldErrors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .collect(Collectors.groupingBy(
@@ -98,14 +88,17 @@ public class GlobalExceptionHandler {
 
         ApiError error = new ApiError(
                 LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
+                status.value(),
                 "Ошибка валидации",
-                request.getMethod(),
-                request.getRequestURI(),
+                httpRequest.getMethod(),
+                httpRequest.getRequestURI(),
                 fieldErrors
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+
+        return new ResponseEntity<>(error, headers, status);
     }
+
+
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiError> handleMethodArgumentTypeMismatchException(
@@ -121,5 +114,47 @@ public class GlobalExceptionHandler {
                 Map.of()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+
+        ServletWebRequest servletWebRequest = (ServletWebRequest) request;
+        HttpServletRequest httpRequest = servletWebRequest.getRequest();
+
+        ApiError error = new ApiError(
+                LocalDateTime.now(),
+                status.value(),
+                "JSON некорректно сформирован",
+                httpRequest.getMethod(),
+                httpRequest.getRequestURI(),
+                Map.of()
+        );
+
+        return new ResponseEntity<>(error, headers, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,
+                                                                         HttpHeaders headers,
+                                                                         HttpStatusCode status,
+                                                                         WebRequest request) {
+
+        ServletWebRequest servletWebRequest = (ServletWebRequest) request;
+        HttpServletRequest httpRequest = servletWebRequest.getRequest();
+
+        ApiError error = new ApiError(
+                LocalDateTime.now(),
+                status.value(),
+                "Метод не поддерживается",
+                httpRequest.getMethod(),
+                httpRequest.getRequestURI(),
+                Map.of()
+        );
+        return new ResponseEntity<>(error, headers, status);
     }
 }

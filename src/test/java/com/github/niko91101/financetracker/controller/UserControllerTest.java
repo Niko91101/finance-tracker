@@ -155,20 +155,19 @@ public class UserControllerTest {
                 .updateUser(anyLong(), any(UpdateUserRequest.class));
     }
 
-//    @Test
-//    @DisplayName(value = "Должен вернуть 405 при неподдерживаемом HTTP-методе")
-//    void shouldReturnMethodNotAllowedWhenHttpMethodIsNotSupported() throws Exception {
-//
-//         mockMvc.perform(
-//                        patch("/users/1")
-//                )
-//
-//                .andExpect(status().isMethodNotAllowed())
-//                .andExpect(jsonPath("$.status").value(405))
-//                .andExpect(jsonPath("$.method").value("PATCH"))
-//                .andExpect(jsonPath("$.path").value("/users/1"));
-//
-//        verifyNoInteractions(userService);
-//
-//    }
+    @Test
+    @DisplayName(value = "Должен вернуть 405 при неподдерживаемом HTTP-методе")
+    void shouldReturnMethodNotAllowedWhenHttpMethodIsNotSupported() throws Exception {
+
+         mockMvc.perform(
+                        patch("/users/1")
+                )
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.status").value(405))
+                .andExpect(jsonPath("$.method").value("PATCH"))
+                .andExpect(jsonPath("$.path").value("/users/1"));
+
+        verifyNoInteractions(userService);
+
+    }
 }
