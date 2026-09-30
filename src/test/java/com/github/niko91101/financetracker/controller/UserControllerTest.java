@@ -8,7 +8,8 @@ import com.github.niko91101.financetracker.exception.UserNotFoundException;
 import com.github.niko91101.financetracker.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -76,6 +77,19 @@ public class UserControllerTest {
     }
 
     @Test
+    @DisplayName(value = "Должен вернуть код 400 при некорректном ID")
+    void shouldReturnBadRequestWhenGetUserRequestIsInvalid() throws Exception {
+
+        mockMvc.perform(get("/users/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.method").value("GET"))
+                .andExpect(jsonPath("$.path").value("/users/abc"))
+                .andExpect(jsonPath("$.message")
+                        .value("Некорректное значение параметра: id"));
+    }
+
+    @Test
     @DisplayName(value = "Должен вернуть ApiError при отсутствии пользователя")
     void shouldReturnApiErrorWhenUserNotFound() throws Exception {
 
@@ -115,12 +129,84 @@ public class UserControllerTest {
                 .build();
 
         mockMvc.perform(
-                put("/users/{id}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-        )
+                        put("/users/{id}", 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
                 .andExpect(status().isBadRequest());
 
         verify(userService, never()).updateUser(eq(1L), any(UpdateUserRequest.class));
+    }
+
+    @Test
+    @DisplayName(value = "Должен вернуть 400, когда JSON некорректно сформирован")
+    void shouldReturnBadRequestWhenJsonIsMalformed() throws Exception {
+
+        mockMvc.perform(
+                        put("/users/{id}", 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                          "username": "Стасик",
+                                          "password": "secret"
+                                        """)
+                )
+                .andExpect(status().isBadRequest());
+
+        verify(userService, never())
+                .updateUser(anyLong(), any(UpdateUserRequest.class));
+    }
+
+    @Test
+    @DisplayName(value = "Должен вернуть 405 при неподдерживаемом HTTP-методе")
+    void shouldReturnMethodNotAllowedWhenHttpMethodIsNotSupported() throws Exception {
+
+        mockMvc.perform(
+                        patch("/users/1")
+                )
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.status").value(405))
+                .andExpect(jsonPath("$.method").value("PATCH"))
+                .andExpect(jsonPath("$.path").value("/users/1"));
+
+        verifyNoInteractions(userService);
+    }
+
+    @Test
+    @DisplayName("Должен вернуть 415 при неподдерживаемом Content-Type")
+    void shouldReturnUnsupportedMediaType() throws Exception {
+
+        mockMvc.perform(
+                        post("/users")
+                                .contentType(MediaType.TEXT_PLAIN)
+                                .content("""
+                                        {
+                                          "username": "Стасик",
+                                          "password": "secret"
+                                        }
+                                        """)
+                )
+                .andExpect(status().isUnsupportedMediaType())
+                .andExpect(jsonPath("$.status").value(415))
+                .andExpect(jsonPath("$.method").value("POST"))
+                .andExpect(jsonPath("$.path").value("/users"));
+
+        verifyNoInteractions(userService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {0, -1, -100})
+    @DisplayName("Должен вернуть 400 при ID пользователя равного или меньшего ноля")
+    void shouldReturnBadRequestWhenUserIdIsNotPositive(long id) throws Exception {
+
+        mockMvc.perform(
+                        get("/users/{id}", id)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.method").value("GET"))
+                .andExpect(jsonPath("$.path").value("/users/" + id));
+
+        verifyNoInteractions(userService);
     }
 }
