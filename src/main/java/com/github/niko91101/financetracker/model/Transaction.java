@@ -20,7 +20,7 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Сумма не можеть быть пустой")
+    @NotNull(message = "Сумма не может быть пустой")
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
 

@@ -1,15 +1,18 @@
 package com.github.niko91101.financetracker.dto.request;
 
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
+@Builder
 public class CreateTransactionRequest {
 
     @NotNull(message = "Сумма не может быть пустой")
     @Positive(message = "Сумма не может быть меньше нуля")
+    @Digits(integer = 17, fraction = 2)
     private BigDecimal amount;
 
     @Size(min = 5, max = 50, message = "Описание должно быть от 5 до 50 символов")
