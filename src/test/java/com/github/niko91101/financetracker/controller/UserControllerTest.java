@@ -45,7 +45,8 @@ public class UserControllerTest {
 
         when(userService.getUserById(1L)).thenReturn(response);
 
-        mockMvc.perform(get("/users/1"))
+        mockMvc.perform(
+                        get("/users/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.username").value("Стасик"))
