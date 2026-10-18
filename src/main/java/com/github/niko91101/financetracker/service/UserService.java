@@ -36,8 +36,13 @@ public class UserService {
     public UserResponse saveUser(CreateUserRequest user) {
         ValidationUtil.validate(user);
 
-        User userEntity = userRepository.save(userMapper.toEntity(user));
-        return userMapper.toResponse(userEntity);
+        User userEntity = userMapper.toEntity(user);
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+
+        userEntity.setPassword(encodedPassword);
+        User savedUser = userRepository.save(userEntity);
+
+        return userMapper.toResponse(savedUser);
     }
 
     @Transactional
@@ -47,8 +52,9 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
+        String encodedPassword = passwordEncoder.encode(updateUser.getPassword());
         user.setUsername(updateUser.getUsername());
-        user.setPassword(updateUser.getPassword());
+        user.setPassword(encodedPassword);
 
         return userMapper.toResponse(user);
     }

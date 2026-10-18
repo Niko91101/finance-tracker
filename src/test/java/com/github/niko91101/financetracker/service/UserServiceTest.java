@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.*;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.github.niko91101.financetracker.model.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -28,6 +29,9 @@ public class UserServiceTest {
 
     @Mock
     UserMapper userMapper;
+
+    @Mock
+    PasswordEncoder passwordEncoder;
 
     @InjectMocks
     UserService userService;
@@ -124,12 +128,18 @@ public class UserServiceTest {
             when(userMapper.toResponse(userEntity))
                     .thenReturn(userResponse);
 
+            when(passwordEncoder.encode(request.getPassword()))
+                    .thenReturn("$2a$encodedPassword");
+
             UserResponse result = userService.saveUser(request);
 
             assertNotNull(result);
+            assertEquals("$2a$encodedPassword", userEntity.getPassword());
+            assertNotEquals(request.getPassword(), userEntity.getPassword());
 
-            InOrder inOrder = inOrder(userMapper, userRepository);
+            InOrder inOrder = inOrder(userMapper, passwordEncoder, userRepository);
             inOrder.verify(userMapper).toEntity(request);
+            inOrder.verify(passwordEncoder).encode(request.getPassword());
             inOrder.verify(userRepository).save(userEntity);
             inOrder.verify(userMapper).toResponse(userEntity);
             inOrder.verifyNoMoreInteractions();
@@ -142,7 +152,7 @@ public class UserServiceTest {
             assertThrows(IllegalArgumentException.class,
                     () -> userService.saveUser(null));
 
-            verifyNoInteractions(userRepository, userMapper);
+            verifyNoInteractions(userRepository, userMapper, passwordEncoder);
         }
     }
 
@@ -159,7 +169,7 @@ public class UserServiceTest {
         }
 
         @Test
-        @DisplayName("Должен обновить пользователя пользователя без вызова save")
+        @DisplayName("Должен обновить пользователя без вызова save")
         void shouldUpdateUser() {
 
             when(userRepository.findById(1L))
@@ -168,12 +178,17 @@ public class UserServiceTest {
             when(userMapper.toResponse(userEntity))
                     .thenReturn(userResponse);
 
+            when(passwordEncoder.encode(request.getPassword()))
+                    .thenReturn("encodedNewSecret");
 
             UserResponse result = userService.updateUser(1L, request);
-            assertEquals("newSecret", userEntity.getPassword());
+
+            assertNotEquals("newSecret", userEntity.getPassword());
+            assertEquals("encodedNewSecret", userEntity.getPassword());
             assertEquals("Стасик", userEntity.getUsername());
 
             verify(userRepository).findById(1L);
+            verify(passwordEncoder).encode(request.getPassword());
             verify(userRepository, never()).save(any());
             verify(userMapper).toResponse(userEntity);
 
@@ -181,7 +196,7 @@ public class UserServiceTest {
         }
 
         @Test
-        @DisplayName("Должен выбросить исключения IllegalArgumentException когда пользователь не найден")
+        @DisplayName("Должен выбросить исключения UserNotFoundException, когда пользователь не найден")
         void shouldThrowWhenUserNotFound() {
             when(userRepository.findById(99L))
                     .thenReturn(Optional.empty());
@@ -192,7 +207,7 @@ public class UserServiceTest {
             assertTrue(ex.getMessage().contains("99"));
             verify(userRepository).findById(99L);
             verify(userRepository, never()).save(any());
-            verifyNoInteractions(userMapper);
+            verifyNoInteractions(userMapper, passwordEncoder);
         }
     }
 
