@@ -27,7 +27,7 @@ public class User {
     private String username;
 
     @NotBlank(message = "Пароль не может быть пустым")
-    @Size(min = 5, max = 12, message = "Пароль должен быть от 5 до 12 символом")
+    @Column(nullable = false, length = 255)
     private String password;
 
     @Builder.Default
